@@ -49,7 +49,7 @@ async function parseProtyle(protyle: IProtyle): Promise < IProtyleInfo > {
     return result
 }
 
-export class ContentApplyer {
+export class ContentInjector {
 
     constructor() {
     }
@@ -57,8 +57,8 @@ export class ContentApplyer {
     async apply(protyle: IProtyle, replace: boolean = false) {
         // 检查是否已经插入元素
         // 如果已经插入且replace，则移除已插入元素
-        const existContainer = protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`);
-        if (existContainer) {
+        const existDiv = protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`);
+        if (existDiv) {
             if (replace) {
                 protyle.element.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => {
                     elem.remove();

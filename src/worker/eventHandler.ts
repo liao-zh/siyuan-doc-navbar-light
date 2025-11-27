@@ -3,7 +3,7 @@ import {
     Plugin,
     type IEventBusMap, type IProtyle
 } from "siyuan"
-import { ContentApplyer } from "@/worker/contentApplyer";
+import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { logLog } from "@/utils/logger";
 
@@ -31,8 +31,8 @@ export default class EventHandler {
     }
 
     async processProtyle(protyle: IProtyle) {
-        const contentApplyer = new ContentApplyer();
-        await contentApplyer.apply(protyle, true);
+        const contentInjector = new ContentInjector();
+        await contentInjector.apply(protyle, true);
     }
 
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
