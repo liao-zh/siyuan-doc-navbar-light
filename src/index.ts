@@ -33,7 +33,7 @@ export default class DocBreadcrumbLight extends Plugin {
 
     onLayoutReady() {
         logInfo("开启插件");
-
+        // 绑定事件处理器
         this.eventHandler.bindHandler();
 
         // 测试
@@ -43,7 +43,12 @@ export default class DocBreadcrumbLight extends Plugin {
 
     async onunload() {
         logInfo("关闭插件");
+        // 解绑事件处理器
         this.eventHandler.unbindHandler();
+        // 移除所有已经插入的元素
+        document.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach((elem) => {
+            elem.remove();
+        });
     }
 
     uninstall() {
