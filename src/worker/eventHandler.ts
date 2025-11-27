@@ -1,28 +1,31 @@
 // 触发事件处理器
 import {
+    Plugin,
     type IEventBusMap, type IProtyle
 } from "siyuan"
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { logLog } from "@/utils/logger";
 
 export default class EventHandler {
-
+    private plugin: Plugin;
     private handlerList: Record<string, (arg1: CustomEvent)=>void> = {
         "loaded-protyle-static": this.handleLoadedProtyleStatic.bind(this),
         "switch-protyle": this.handleSwitchProtyle.bind(this),
     };
 
+    constructor() {
+        this.plugin = getPluginInstance();
+    }
+
     bindHandler() {
-        const plugin = getPluginInstance();
         for (let key in this.handlerList) {
-            plugin.eventBus.on(key as keyof IEventBusMap, this.handlerList[key]);
+            this.plugin.eventBus.on(key as keyof IEventBusMap, this.handlerList[key]);
         }
     }
 
     unbindHandler() {
-        const plugin = getPluginInstance();
         for (let key in this.handlerList) {
-            plugin.eventBus.off(key as keyof IEventBusMap, this.handlerList[key]);
+            this.plugin.eventBus.off(key as keyof IEventBusMap, this.handlerList[key]);
         }
     }
 

@@ -37,7 +37,7 @@ export default class DocBreadcrumbSimp extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        testHPath2();
+        // testHPath2();
         // testProtyle();
     }
 
