@@ -9,7 +9,7 @@ import { CONSTANTS } from "./constants";
 import { logDebug, logInfo, logLog, logError, logWarn } from "./logger";
 import { setPluginInstance } from "./utils";
 import EventHandler from "./eventHandler";
-import { testEventbus, testEditor, testHPath, testProtyle } from "./test";
+import { testEventbus, testEditor, testHPath, testProtyle, testHPath2 } from "./test";
 
 const STORAGE_NAME = "menu-config";
 
@@ -37,7 +37,7 @@ export default class DocBreadcrumbSimp extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        // testHPath();
+        testHPath2();
         // testProtyle();
     }
 

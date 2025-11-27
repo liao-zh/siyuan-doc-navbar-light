@@ -2,6 +2,7 @@ import {
     getAllEditor,
     fetchPost,
 } from "siyuan";
+import { getHPathByID, getNotebookConf } from "./api"
 import { getPluginInstance } from "./utils";
 import { logLog } from "./logger";
 // 各种局部测试
@@ -86,3 +87,27 @@ export function testHPath() {
         );
     });
 }
+
+// doc path 2
+export function testHPath2() {
+    const plugin = getPluginInstance();
+
+    // getHPathByID：返回文档的路径
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const docId = event.detail.protyle.block.rootID;
+        logLog("getHPathByID-id", docId);
+        getHPathByID(docId).then(res => {
+            logLog("getHPathByID-data", res);
+        });
+    });
+
+    // getNotebookConf：返回笔记本的配置
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const boxId = event.detail.protyle.notebookId;
+        logLog("getNotebookConf-id", boxId);
+        getNotebookConf(boxId).then(res => {
+            logLog("getNotebookConf-data", res.conf.name);
+        });
+    });
+}
+
