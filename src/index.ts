@@ -13,7 +13,7 @@ import { testEventbus, testEditor, testHPath, testProtyle, testHPath2 } from "./
 
 const STORAGE_NAME = "menu-config";
 
-export default class DocBreadcrumbSimp extends Plugin {
+export default class DocBreadcrumbLight extends Plugin {
 
     private isMobile: boolean;
     private eventHandler: EventHandler;

@@ -1,8 +1,8 @@
 {
-  "name": "plugin-doc-breadcrumb-simp",
+  "name": "plugin-doc-breadcrumb-light",
   "version": "0.0.1",
   "type": "module",
-  "description": "A simple breadcrumb plugin for SiYuan",
+  "description": "A light breadcrumb plugin for SiYuan",
   "repository": "",
   "homepage": "",
   "author": "liao-zh",
