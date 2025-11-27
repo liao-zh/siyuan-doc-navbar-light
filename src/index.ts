@@ -6,10 +6,10 @@ import {
 import "@/index.scss";
 
 import { CONSTANTS } from "./constants";
-import { logDebug, logInfo, logLog, logError, logWarn } from "./logger";
-import { setPluginInstance } from "./utils";
-import EventHandler from "./eventHandler";
-import { testEventbus, testEditor, testHPath, testProtyle, testHPath2 } from "./test";
+import { logDebug, logInfo, logLog, logError, logWarn } from "./utils/logger";
+import { setPluginInstance } from "./utils/pluginInstance";
+import EventHandler from "./worker/eventHandler";
+import { testEventbus, testEditor, testHPath, testProtyle, testHPath2 } from "./test/test";
 
 const STORAGE_NAME = "menu-config";
 

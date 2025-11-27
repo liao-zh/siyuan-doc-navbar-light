@@ -2,9 +2,9 @@ import {
     getAllEditor,
     fetchPost,
 } from "siyuan";
-import { getHPathByID, getNotebookConf } from "./api"
-import { getPluginInstance } from "./utils";
-import { logLog } from "./logger";
+import { getHPathByID, getNotebookConf } from "../utils/api"
+import { getPluginInstance } from "../utils/pluginInstance";
+import { logLog } from "../utils/logger";
 // 各种局部测试
 
 // eventbus

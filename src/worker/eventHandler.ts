@@ -2,8 +2,8 @@
 import {
     type IEventBusMap, type IProtyle
 } from "siyuan"
-import { getPluginInstance } from "./utils";
-import { logLog } from "./logger";
+import { getPluginInstance } from "../utils/pluginInstance";
+import { logLog } from "../utils/logger";
 
 export default class EventHandler {
 
