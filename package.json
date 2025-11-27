@@ -1,0 +1,37 @@
+{
+  "name": "plugin-doc-breadcrumb-simp",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "A simple breadcrumb plugin for SiYuan",
+  "repository": "",
+  "homepage": "",
+  "author": "liao-zh",
+  "license": "MIT",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development VITE_SOURCEMAP=inline vite build --watch",
+    "build": "cross-env NODE_ENV=production vite build",
+    "make-link": "node --no-warnings ./scripts/make_dev_link.js",
+    "make-link-win": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/elevate.ps1 -scriptPath ./scripts/make_dev_link.js",
+    "update-version": "node --no-warnings ./scripts/update_version.js",
+    "make-install": "vite build && node --no-warnings ./scripts/make_install.js"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@tsconfig/svelte": "^5.0.6",
+    "@types/node": "^24.10.1",
+    "cross-env": "^10.1.0",
+    "fast-glob": "^3.3.3",
+    "glob": "^13.0.0",
+    "js-yaml": "^4.1.1",
+    "minimist": "^1.2.8",
+    "rollup-plugin-livereload": "^2.0.5",
+    "sass": "^1.94.2",
+    "siyuan": "1.1.5",
+    "svelte": "^5.45.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-static-copy": "^3.1.4",
+    "vite-plugin-zip-pack": "^1.2.4"
+  }
+}

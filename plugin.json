@@ -1,0 +1,46 @@
+{
+  "name": "plugin-doc-breadcrumb-simp",
+  "author": "liao-zh",
+  "url": "",
+  "version": "0.0.1",
+  "minAppVersion": "3.0.12",
+  "backends": [
+    "windows",
+    "linux",
+    "darwin",
+    "ios",
+    "android",
+    "harmony",
+    "docker"
+  ],
+  "frontends": [
+    "desktop",
+    "mobile",
+    "browser-desktop",
+    "browser-mobile",
+    "desktop-window"
+  ],
+  "displayName": {
+    "en_US": "Simple doc breadcrumb",
+    "zh_CN": "简单文档面包屑"
+  },
+  "description": {
+    "en_US": "A simple breadcrumb plugin for SiYuan",
+    "zh_CN": "一个简单的思源文档面包屑插件"
+  },
+  "readme": {
+    "en_US": "README.md",
+    "zh_CN": "README_zh_CN.md"
+  },
+  "funding": {
+    "custom": [
+      ""
+    ]
+  },
+  "keywords": [
+    "breadcrumb",
+    "navigate",
+    "面包屑",
+    "导航"
+  ]
+}
