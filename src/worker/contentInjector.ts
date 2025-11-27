@@ -3,7 +3,7 @@
 import { type IProtyle } from "siyuan";
 import { getHPathByID, getNotebookConf } from "@/utils/api"
 import { CONSTANTS } from "@/constants";
-import { logLog, logDebug } from "@/utils/logger";
+import * as logger from "@/utils/logger";
 
 
 // 从protyle中提取所需属性
@@ -71,7 +71,7 @@ export class ContentInjector {
         // 解析protyle
         const protyleInfo = await parseProtyle(protyle);
 
-        logLog("protyleInfo", protyleInfo);
+        logger.logLog("protyleInfo", protyleInfo);
 
         // 构建容器
         let div = document.createElement("div");

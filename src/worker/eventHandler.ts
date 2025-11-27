@@ -5,7 +5,7 @@ import {
 } from "siyuan"
 import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
-import { logLog } from "@/utils/logger";
+import * as logger from "@/utils/logger";
 
 export default class EventHandler {
     private plugin: Plugin;
@@ -37,13 +37,13 @@ export default class EventHandler {
 
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
         const protyle = event.detail.protyle;
-        logLog("loaded-protyle-static", event);
+        logger.logDebug("loaded-protyle-static", event);
         await this.processProtyle(protyle);
     }
 
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
         const protyle = event.detail.protyle;
-        logLog("switch-protyle", event);
+        logger.logDebug("switch-protyle", event);
         await this.processProtyle(protyle);
     }
 }

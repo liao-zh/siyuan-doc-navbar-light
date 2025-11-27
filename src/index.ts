@@ -6,10 +6,10 @@ import {
 import "@/index.scss";
 
 import { CONSTANTS } from "./constants";
-import { logDebug, logInfo, logLog, logError, logWarn } from "./utils/logger";
+import * as logger from "./utils/logger";
 import { setPluginInstance } from "./utils/pluginInstance";
 import EventHandler from "./worker/eventHandler";
-import { testEventbus, testEditor, testHPath, testProtyle, testHPath2 } from "./test/test";
+import * as test from "./test/test";
 
 const STORAGE_NAME = "menu-config";
 
@@ -21,7 +21,7 @@ export default class DocBreadcrumbLight extends Plugin {
     async onload() {
         this.data[STORAGE_NAME] = { readonlyText: "Readonly" };
 
-        logInfo("加载插件");
+        logger.logInfo("加载插件");
         setPluginInstance(this);
 
         this.eventHandler = new EventHandler();
@@ -32,17 +32,16 @@ export default class DocBreadcrumbLight extends Plugin {
     }
 
     onLayoutReady() {
-        logInfo("开启插件");
+        logger.logInfo("开启插件");
         // 绑定事件处理器
         this.eventHandler.bindHandler();
 
         // 测试
-        // testHPath2();
-        // testProtyle();
+        test.testListDocs();
     }
 
     async onunload() {
-        logInfo("关闭插件");
+        logger.logInfo("关闭插件");
         // 解绑事件处理器
         this.eventHandler.unbindHandler();
         // 移除所有已经插入的元素
@@ -52,7 +51,7 @@ export default class DocBreadcrumbLight extends Plugin {
     }
 
     uninstall() {
-        logInfo("卸载插件");
+        logger.logInfo("卸载插件");
     }
 
 }

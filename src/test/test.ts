@@ -111,3 +111,22 @@ export function testHPath2() {
     });
 }
 
+// list docs
+export function testListDocs() {
+    const plugin = getPluginInstance();
+
+    // 返回按文档树排序的文档列表
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const protyle = event.detail.protyle;
+        fetchPost(
+            "/api/filetree/listDocsByPath",
+            {
+                notebook: protyle.notebookId,
+                path: protyle.path,
+            },
+            (response) => {
+                logLog("listDocsByPath", response.data);
+            }
+        );
+    });
+}
