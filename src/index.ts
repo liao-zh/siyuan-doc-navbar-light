@@ -8,10 +8,10 @@ import "@/index.scss";
 
 import { logDebug, logInfo, logLog, logError, logWarn } from "./logger";
 import { CONSTANTS } from "./constants";
+import { setPluginInstance } from "./utils";
+import { testEventbus } from "./test";
 
 const STORAGE_NAME = "menu-config";
-const TAB_TYPE = "custom_tab";
-const DOCK_TYPE = "dock_tab";
 
 export default class DocBreadcrumbSimp extends Plugin {
 
@@ -20,23 +20,28 @@ export default class DocBreadcrumbSimp extends Plugin {
     async onload() {
         this.data[STORAGE_NAME] = { readonlyText: "Readonly" };
 
-        logLog(`加载插件`);
+        logInfo("加载插件");
 
         const frontEnd = getFrontend();
         this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
 
+        // 绑定插件实例
+        setPluginInstance(this);
     }
 
     onLayoutReady() {
-        logLog(`开启插件`);
+        logInfo("开启插件");
+
+        // 测试
+        testEventbus();
     }
 
     async onunload() {
-        logLog(`关闭插件`);
+        logInfo("关闭插件");
     }
 
     uninstall() {
-        logLog(`卸载插件`);
+        logInfo("卸载插件");
     }
 
 }
