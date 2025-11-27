@@ -1,4 +1,7 @@
-import { getAllEditor } from "siyuan";
+import {
+    getAllEditor,
+    fetchPost,
+} from "siyuan";
 import { getPluginInstance } from "./utils";
 import { logLog } from "./logger";
 // 各种局部测试
@@ -25,7 +28,6 @@ export function testEventbus() {
     });
 }
 
-
 // editor
 export function testEditor() {
     const plugin = getPluginInstance();
@@ -36,3 +38,51 @@ export function testEditor() {
     });
 }
 
+// protyle
+export function testProtyle() {
+    const plugin = getPluginInstance();
+
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const protyle = event.detail.protyle;
+        logLog("protyle", protyle);
+        logLog("protyle.id", protyle.id);
+        logLog("protyle.notebookId", protyle.notebookId);
+        logLog("protyle.path", protyle.path);
+    });
+}
+
+// doc path
+export function testHPath() {
+    const plugin = getPluginInstance();
+
+    // getHPathByID：返回文档的路径
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const docId = event.detail.protyle.block.rootID;
+        logLog("getHPathByID-id", docId);
+        fetchPost(
+            "/api/filetree/getHPathByID",
+            {
+                id: docId,
+            },
+            (response) => {
+                logLog("getHPathByID-data", response.data); // 文档可读路径
+            }
+        );
+    });
+
+    // getNotebookConf：返回笔记本的配置
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const boxId = event.detail.protyle.notebookId;
+        logLog("getNotebookConf-id", boxId);
+        fetchPost(
+            "/api/notebook/getNotebookConf",
+            {
+                notebook: boxId,
+            },
+            (response) => {
+                logLog("getNotebookConf-data", response.data.conf);
+                logLog("getNotebookConf-data-name", response.data.conf.name); // 笔记本名字
+            }
+        );
+    });
+}
