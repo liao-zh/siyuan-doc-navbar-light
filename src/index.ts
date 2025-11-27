@@ -9,7 +9,7 @@ import "@/index.scss";
 import { logDebug, logInfo, logLog, logError, logWarn } from "./logger";
 import { CONSTANTS } from "./constants";
 import { setPluginInstance } from "./utils";
-import { testEventbus } from "./test";
+import { testEventbus, testEditor } from "./test";
 
 const STORAGE_NAME = "menu-config";
 
@@ -34,6 +34,7 @@ export default class DocBreadcrumbSimp extends Plugin {
 
         // 测试
         testEventbus();
+        // testEditor();
     }
 
     async onunload() {
