@@ -37,7 +37,7 @@ export default class DocBreadcrumbLight extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        test.testListDocs();
+        // test.testListDocs();
     }
 
     async onunload() {

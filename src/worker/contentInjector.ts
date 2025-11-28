@@ -1,7 +1,8 @@
 // 制作和插入面包屑
 
-import { type IProtyle } from "siyuan";
+import { type IProtyle, openTab, Plugin } from "siyuan";
 import { getHPathByID, getNotebookConf } from "@/utils/api"
+import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
 
@@ -50,8 +51,10 @@ async function parseProtyle(protyle: IProtyle): Promise < IProtyleInfo > {
 }
 
 export class ContentInjector {
+    private plugin: Plugin
 
     constructor() {
+        this.plugin =  getPluginInstance();
     }
 
     async apply(protyle: IProtyle, replace: boolean = false) {
@@ -71,7 +74,7 @@ export class ContentInjector {
         // 解析protyle
         const protyleInfo = await parseProtyle(protyle);
 
-        logger.logLog("protyleInfo", protyleInfo);
+        logger.logDebug("protyleInfo", protyleInfo);
 
         // 构建容器
         let div = document.createElement("div");
@@ -140,6 +143,19 @@ export class ContentInjector {
         text.title = name;
         text.innerHTML = name;
         elem.appendChild(text);
+
+        // 添加点击事件
+        if (isFile) {
+            elem.addEventListener("click", (e) => {
+                e.stopPropagation();
+                logger.logLog("clickBreadcrumbItem", id);
+                openTab({
+                    app: this.plugin.app,
+                    doc: { id, },
+                });
+            });
+        }
+
 
         return elem;
     }
