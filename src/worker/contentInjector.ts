@@ -2,6 +2,7 @@
 
 import { App, type IProtyle, openTab, Plugin } from "siyuan";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/processProtyle";
+import { removeInjectedFromProtyle } from "@/utils/processDOM";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
@@ -19,9 +20,7 @@ export class ContentInjector {
         const existDiv = protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`);
         if (existDiv) {
             if (replace) {
-                protyle.element.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => {
-                    elem.remove();
-                });
+                removeInjectedFromProtyle(protyle);
             } else {
                 return;
             }

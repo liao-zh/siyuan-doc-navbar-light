@@ -6,6 +6,7 @@ import {
 } from "siyuan"
 import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
+import { getAllShowingDocId, removeInjected } from "@/utils/processDOM";
 import * as logger from "@/utils/logger";
 
 export class EventHandler {
@@ -25,8 +26,8 @@ export class EventHandler {
         for (let key in this.handlerList) {
             this.plugin.eventBus.on(key as keyof IEventBusMap, this.handlerList[key]);
         }
-
         // 首次加载时处理已经打开的文档
+        removeInjected();
         this.handleProtyleAllShowing();
     }
 
@@ -36,9 +37,9 @@ export class EventHandler {
         }
     }
 
-    async handleProtyle(protyle: IProtyle) {
+    async handleProtyle(protyle: IProtyle, replace: boolean = false) {
         const contentInjector = new ContentInjector();
-        await contentInjector.apply(protyle, true);
+        await contentInjector.apply(protyle, replace);
     }
 
     async handleProtyleAllShowing() {
@@ -49,7 +50,7 @@ export class EventHandler {
         if (ids != null && ids.length > 0) {
             for (let editor of allEditor) {
                 if (ids.includes(editor.protyle.block.rootID)) {
-                    await this.handleProtyle(editor.protyle);
+                    await this.handleProtyle(editor.protyle, true);
                 }
             }
         }
@@ -58,13 +59,13 @@ export class EventHandler {
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
         logger.logDebug("loaded-protyle-static", event);
         const protyle = event.detail.protyle;
-        await this.handleProtyle(protyle);
+        await this.handleProtyle(protyle, false);
     }
 
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
         logger.logDebug("switch-protyle", event);
         const protyle = event.detail.protyle;
-        await this.handleProtyle(protyle);
+        await this.handleProtyle(protyle, true);
     }
 
     async handleWSMain(event: CustomEvent<IEventBusMap["ws-main"]>) {
@@ -77,10 +78,3 @@ export class EventHandler {
     }
 }
 
-// 获取所有显示中的文档id
-// 从文档层级导航插件复制而来
-function getAllShowingDocId(): string[] {
-    const elemList = window.document.querySelectorAll("[data-type=wnd] .protyle.fn__flex-1:not(.fn__none) .protyle-background");
-    const result = Array.from(elemList).map(elem => elem.getAttribute("data-node-id"));
-    return result
-}

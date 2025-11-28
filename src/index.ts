@@ -6,9 +6,10 @@ import {
 import "@/index.scss";
 
 import { CONSTANTS } from "./constants";
-import * as logger from "./utils/logger";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { EventHandler } from "./worker/eventHandler";
+import { removeInjected } from "./utils/processDOM";
+import * as logger from "./utils/logger";
 import * as test from "./test/test";
 
 const STORAGE_NAME = "menu-config";
@@ -24,6 +25,7 @@ export default class DocBreadcrumbLight extends Plugin {
         logger.logInfo("加载插件");
         setPluginInstance(this);
 
+        // 事件处理器初始化
         this.eventHandler = new EventHandler();
 
         const frontEnd = getFrontend();
@@ -33,7 +35,8 @@ export default class DocBreadcrumbLight extends Plugin {
 
     onLayoutReady() {
         logger.logInfo("开启插件");
-        // 绑定事件处理器
+
+        // 事件处理器绑定
         this.eventHandler.bindHandler();
 
         // 测试
@@ -42,12 +45,10 @@ export default class DocBreadcrumbLight extends Plugin {
 
     async onunload() {
         logger.logInfo("关闭插件");
-        // 解绑事件处理器
+        // 事件处理器解绑
         this.eventHandler.unbindHandler();
         // 移除所有已经插入的元素
-        document.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach((elem) => {
-            elem.remove();
-        });
+        removeInjected();
     }
 
     uninstall() {
