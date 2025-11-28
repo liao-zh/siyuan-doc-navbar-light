@@ -7,8 +7,6 @@ import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
 
 
-
-
 export class ContentInjector {
     private plugin: Plugin
 
@@ -71,14 +69,14 @@ export class ContentInjector {
 
         // 添加笔记本
         div.appendChild(
-            this.createBreadcrumbItem(protyleInfo.docId, protyleInfo.notebookName, "#iconFolder", false)
+            this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook")
         );
 
         // 添加箭头和路径上的文档
         for (let i = 0; i < pathItems.length; i++) {
             div.appendChild(this.createBreadcrumbArrow());
             div.appendChild(
-                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "#iconFile", true)
+                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc")
             )
         }
 
@@ -87,33 +85,16 @@ export class ContentInjector {
 
     // 构建文档面包屑HTML元素中的每个层级
     // DOM：span容器/{图标-文本}
-    createBreadcrumbItem(id: string, name: string, iconName: string, isFile: boolean = true): HTMLElement {
-        // 构建容器
-        const elem = document.createElement("span");
-        elem.classList.add("protyle-breadcrumb__item");
-        elem.style.maxWidth = CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH;
-
-        // 构建图标
-        const svg = createSvg("popover__block", iconName);
-        elem.appendChild(svg);
-
-        // 构建文本元素
-        const text = document.createElement("span");
-        text.classList.add("protyle-breadcrumb__text");
-        text.title = name;
-        text.innerHTML = name;
-        elem.appendChild(text);
-
-        // 如果是文档而非笔记本，添加id和点击事件
-        if (isFile) {
-            elem.dataset.nodeId = id;
-            svg.dataset.id = id;
-            elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
-            elem.style.cursor = "pointer";
-        } else {
-            elem.style.cursor = "default";
-        }
-
+    createBreadcrumbItem(id: string, name: string, type: "doc" | "notebook"): HTMLElement {
+        const elem = createItem({
+            app: this.plugin.app,
+            id,
+            name,
+            innerHTML: name,
+            iconName: type === "doc" ? "#iconFile" : "#iconFolder",
+            isClickable: type === "doc", // 文档才可点击
+            maxWidth: type === "doc" ? CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 文档项宽度限制
+        })
         return elem;
     }
 
@@ -129,46 +110,82 @@ export class ContentInjector {
         logger.logDebug("ContentInjector/createAdjacent: 相邻文档", adjDocs);
 
         // 构建上一篇和下一篇
-        const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "上一篇", "#iconBack");
-        const elemNext = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "下一篇", "#iconForward");
+        const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
+        const elemNext = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "next");
         return { elemPrev, elemNext };
     }
 
-    // 构建相邻文档的单个项目
-    // DOM：span容器/{图标-文本}
-    createAdjacentItem(id: string | null, name: string | null, displayName: string, iconName: string): HTMLElement {
-        // 构建容器
-        const elem = document.createElement("span");
-        elem.classList.add("protyle-breadcrumb__item");
+    createAdjacentItem(id: string, name: string , type: "prev" | "next"): HTMLElement {
+        const elem = createItem({
+            app: this.plugin.app,
+            id,
+            name,
+            innerHTML: type === "prev" ? "上一篇" : "下一篇",
+            iconName: type === "prev" ? "#iconBack" : "#iconForward",
+            isClickable: (id !== null), // 存在相邻文档时才可点击
+            naOpacity: CONSTANTS.STYLE_DISABLED_OPACITY, // 不可点击时灰化
+        })
+        return elem
+    }
+}
 
-        // 构建图标
-        const svg = createSvg("popover__block", iconName);
-        elem.appendChild(svg);
+// 构建面包屑条目样式的元素
+// DOM：span容器/{图标-文本}
+// @param id 文档或笔记本ID
+// @param name 文档或笔记本名称
+// @param innerHTML 要显示的文本内容
+// @param iconName 图标名称
+// @param isClickable 是否可点击
+// @param app 思源应用实例
+// @param maxWidth? 最大宽度
+// @param naOpacity? 不可点击时的透明度
+function createItem({
+        id,
+        name,
+        innerHTML,
+        iconName,
+        isClickable,
+        app,
+        maxWidth,
+        naOpacity,
+    }: {
+        id: string;
+        name: string;
+        innerHTML: string;
+        iconName: string;
+        isClickable: boolean;
+        app: App;
+        maxWidth?: string;
+        naOpacity?: string;
+    }): HTMLElement {
+    // 构建容器
+    const elem = document.createElement("span");
+    elem.classList.add("protyle-breadcrumb__item");
+    maxWidth && (elem.style.maxWidth = maxWidth);
 
-        // 构建文本元素
-        const text = document.createElement("span");
-        text.classList.add("protyle-breadcrumb__text");
-        text.innerHTML = displayName;
-        elem.appendChild(text);
+    // 构建图标
+    const svg = createSvg("popover__block", iconName);
+    elem.appendChild(svg);
 
-        // 添加id
-        if (id !== null) {
-            elem.dataset.nodeId = id;
-            svg.dataset.id = id;
-            text.title = name;
-            elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
-            elem.style.cursor = "pointer";
-        } else {
-            elem.style.opacity = CONSTANTS.STYLE_DISABLED_OPACITY;
-            elem.style.cursor = "default";
-        }
+    // 构建文本元素
+    const text = document.createElement("span");
+    text.classList.add("protyle-breadcrumb__text");
+    name && (text.title = name); // name有值时才设置title
+    text.innerHTML = innerHTML;
+    elem.appendChild(text);
 
-        // 添加点击事件
-
-        return elem;
+    // 如果可点击，则添加id和点击事件
+    if (isClickable) {
+        elem.dataset.nodeId = id;
+        svg.dataset.id = id;
+        elem.addEventListener("click", clickHandler.bind(null, app, id));
+        elem.style.cursor = "pointer";
+    } else {
+        naOpacity && (elem.style.opacity = naOpacity);
+        elem.style.cursor = "default";
     }
 
-
+    return elem;
 }
 
 // 构建SVG图标元素
