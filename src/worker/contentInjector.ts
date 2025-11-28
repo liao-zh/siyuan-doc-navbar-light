@@ -145,30 +145,20 @@ export class ContentInjector {
     }
 
     // 构建文档面包屑HTML元素中的每个层级
-    createBreadcrumbItem(id: string, name: string, icon: string, isFile: boolean = true): HTMLElement {
-        // 命名空间
-        const nsSvg = "http://www.w3.org/2000/svg";
-        const nsXlink = "http://www.w3.org/1999/xlink";
-
+    createBreadcrumbItem(id: string, name: string, iconName: string, isFile: boolean = true): HTMLElement {
         // 构建容器
         let elem = document.createElement("span");
         elem.classList.add("protyle-breadcrumb__item");
 
         // 构建xvg和xlink
-        let svg = document.createElementNS(nsSvg, "svg");
-        svg.classList.add("popover__block");
-        let xlink = document.createElementNS(nsSvg, "use");
-        xlink.setAttributeNS(nsXlink, "xlink:href", icon);
+        let svg = createSvg("popover__block", iconName);
+        elem.appendChild(svg);
 
         // 如果是文档而非笔记本，添加id
         if (isFile) {
             elem.dataset.nodeId = id;
             svg.dataset.id = id;
         }
-
-        // 添加元素
-        svg.appendChild(xlink);
-        elem.appendChild(svg);
 
         // 构建文本元素
         let text = document.createElement("span");
@@ -187,28 +177,29 @@ export class ContentInjector {
     }
 
     // 构建面包屑层级之间的箭头
-    createBreadcrumbArrow() {
-        // 命名空间
-        const nsSvg = "http://www.w3.org/2000/svg";
-        const nsXlink = "http://www.w3.org/1999/xlink";
-
-        // 构建svg和xlink
-        let svg = document.createElementNS(nsSvg, "svg");
-        svg.classList.add("protyle-breadcrumb__arrow");
-        let xlink = document.createElementNS(nsSvg, "use");
-        xlink.setAttributeNS(nsXlink, "xlink:href", "#iconRight");
-        svg.appendChild(xlink);
-        return svg;
+    createBreadcrumbArrow(): SVGElement {
+        return createSvg("protyle-breadcrumb__arrow", "#iconRight");
     }
 
-    createNeighbor(protyleInfo: IProtyleInfo) {
+    createNeighbors(protyleInfo: IProtyleInfo) {
 
     }
 
 }
 
-function createSvg(className: string, icon: string) {
+function createSvg(className: string, iconName: string): SVGElement {
+    // 命名空间
+    const nsSvg = "http://www.w3.org/2000/svg";
+    const nsXlink = "http://www.w3.org/1999/xlink";
 
+    // 构建xvg和xlink
+    let svg = document.createElementNS(nsSvg, "svg");
+    svg.classList.add(className);
+    let xlink = document.createElementNS(nsSvg, "use");
+    xlink.setAttributeNS(nsXlink, "xlink:href", iconName);
+    svg.appendChild(xlink);
+
+    return svg;
 }
 
 function clickHandler(app: App, id: string, e: MouseEvent) {
