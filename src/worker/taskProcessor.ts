@@ -83,6 +83,7 @@ export class TaskProcessor {
 
             // 执行实际的处理逻辑
             const contentInjector = new ContentInjector();
+            // 是否replace要放在处理时判断，如果在添加任务时提前判断，可能到了处理时状态又改变了
             await contentInjector.apply(task.protyle, task.replace);
             logger.logDebug(`任务${id}：处理完成`);
         } catch (error) {
