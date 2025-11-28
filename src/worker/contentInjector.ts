@@ -2,7 +2,7 @@
 
 import { App, type IProtyle, openTab, Plugin } from "siyuan";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/protyleUtils";
-import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
+import { existInjectedInProtyle, removeInjectedFromProtyle } from "@/utils/DOMUtils";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
@@ -16,42 +16,52 @@ export class ContentInjector {
     // @param protyle 要添加元素的protyle
     // @param replace 是否替换已存在的元素
     async apply(protyle: IProtyle, replace: boolean = false) {
-        // 检查是否已经插入元素：如果已经插入且replace，则移除已插入元素
-        const existDiv = protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`);
-        if (existDiv) {
+        // 判断是否需要执行任务，或要移除已经插入的元素
+        if (existInjectedInProtyle(protyle)) {
+            // 存在已插入元素，且要替换，则移除已插入元素
             if (replace) {
                 removeInjectedFromProtyle(protyle);
-            } else {
+            }
+            // 存在已插入元素，且不替换，则不执行任务
+            else {
                 return;
             }
+        }
+        // 不存在已插入元素，则执行任务
+
+        // 判断是否存在块面包屑
+        const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
+        if (!blockBreadcrumb) {
+            logger.logDebug("ContentInjector/apply: 不存在块面包屑，退出");
+            return;
         }
 
         // 获取插件实例
         this.plugin =  getPluginInstance();
         // 解析protyle
         const protyleInfo = await getProtyleInfo(protyle);
-        logger.logDebug("ContentInjector/apply: protyle", protyle);
-        logger.logDebug("ContentInjector/apply: protyleInfo", protyleInfo);
+        logger.logDebug("ContentInjector/apply: protyle信息", protyleInfo);
 
         // 构建整个面包屑容器
         const div = document.createElement("div");
         div.classList.add("protyle-breadcrumb", CONSTANTS.CLASS_CONTAINER);
         // 插入现有面包屑之前
-        protyle.element.querySelector(".protyle-breadcrumb").insertAdjacentElement("beforebegin", div);
+        blockBreadcrumb.insertAdjacentElement("beforebegin", div);
 
         // 构建面包屑元素
-        div.appendChild(this.createBreadcrumb(protyleInfo));
+        const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
+        div.appendChild(elemBreadcrumb);
 
-        // 添加空格
-        const space = document.createElement("span");
-        space.classList.add("protyle-breadcrumb__space");
-        space.style.maxWidth = CONSTANTS.STYLE_SPACE_MAXWIDTH;
-        div.appendChild(space);
+        // 添加空格间距
+        // 取消原因：相邻文档中用了影子元素后不需要额外间距了
+        // const space = document.createElement("span");
+        // space.classList.add("protyle-breadcrumb__space");
+        // space.style.maxWidth = CONSTANTS.STYLE_SPACE_MAXWIDTH;
+        // div.appendChild(space);
 
         // 构建相邻文档元素
-        const { elemPrev, elemNext } = await this.createAdjacent(protyleInfo);
-        div.appendChild(elemPrev);
-        div.appendChild(elemNext);
+        const elemAdjacent = await this.createAdjacent(protyleInfo);
+        div.appendChild(elemAdjacent);
     }
 
     // 构建文档面包屑元素
@@ -107,11 +117,29 @@ export class ContentInjector {
         // 查找相邻文档
         const adjDocs = await getAdjacentDocs(protyleInfo.docId, protyleInfo.notebookId, protyleInfo.path);
         // logger.logDebug("ContentInjector/createAdjacent: 相邻文档", adjDocs);
-
         // 构建上一篇和下一篇
         const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
         const elemNext = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "next");
-        return { elemPrev, elemNext };
+
+        // 构建容器，保持和面包屑部分样式一致
+        const div = document.createElement("div");
+        div.classList.add("protyle-breadcrumb__bar", "protyle-breadcrumb__bar--nowrap");
+        div.style.minWidth = CONSTANTS.STYLE_ADJACENT_MINWIDTH;
+        // 构建假元素，应对有些外观样式（如Savor）会将第一个元素的图标改掉
+        const elemShaddow = createItem({
+            app: this.plugin.app,
+            id: null,
+            name: null,
+            innerHTML: "",
+            iconName: "#iconFile",
+            isClickable: false,
+            naOpacity: "0",
+        })
+        // 容器加入假元素、上一篇、下一篇
+        div.appendChild(elemShaddow);
+        div.appendChild(elemPrev);
+        div.appendChild(elemNext);
+        return div;
     }
 
     createAdjacentItem(id: string, name: string , type: "prev" | "next"): HTMLElement {
@@ -119,7 +147,7 @@ export class ContentInjector {
             app: this.plugin.app,
             id,
             name,
-            innerHTML: type === "prev" ? "上一篇" : "下一篇",
+            innerHTML: type === "prev" ? CONSTANTS.LABEL_ADJACENT_PREV : CONSTANTS.LABEL_ADJACENT_NEXT,
             iconName: type === "prev" ? "#iconBack" : "#iconForward",
             isClickable: (id !== null), // 存在相邻文档时才可点击
             naOpacity: CONSTANTS.STYLE_DISABLED_OPACITY, // 不可点击时灰化
@@ -139,21 +167,21 @@ export class ContentInjector {
 // @param maxWidth? 最大宽度
 // @param naOpacity? 不可点击时的透明度
 function createItem({
+        app,
         id,
         name,
         innerHTML,
         iconName,
         isClickable,
-        app,
         maxWidth,
         naOpacity,
     }: {
+        app: App;
         id: string;
         name: string;
         innerHTML: string;
         iconName: string;
         isClickable: boolean;
-        app: App;
         maxWidth?: string;
         naOpacity?: string;
     }): HTMLElement {
