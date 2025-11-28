@@ -1,8 +1,8 @@
 {
   "name": "plugin-doc-breadcrumb-light",
   "author": "liao-zh",
-  "url": "",
-  "version": "0.0.1",
+  "url": "https://gitee.com/liao-zh/plugin-doc-breadcrumb-light",
+  "version": "0.1.0",
   "minAppVersion": "3.0.12",
   "backends": [
     "windows",
@@ -15,9 +15,7 @@
   ],
   "frontends": [
     "desktop",
-    // "mobile",
     "browser-desktop",
-    // "browser-mobile",
     "desktop-window"
   ],
   "displayName": {
