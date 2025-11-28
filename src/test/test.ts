@@ -2,7 +2,7 @@ import {
     getAllEditor,
     fetchPost,
 } from "siyuan";
-import { getHPathByID, getNotebookConf } from "@/utils/api"
+import { request, getHPathByID, getNotebookConf } from "@/utils/api"
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { logLog } from "@/utils/logger";
 // 各种局部测试
@@ -128,5 +128,42 @@ export function testListDocs() {
                 logLog("listDocsByPath", response.data);
             }
         );
+    });
+}
+
+// 查找同级相邻的文档
+export function testListDocs2() {
+    const plugin = getPluginInstance();
+
+    // 返回按文档树排序的文档列表
+    plugin.eventBus.on("switch-protyle", (event) => {
+        const protyle = event.detail.protyle;
+        // 得到父级的路径
+        const parts = protyle.path.split('/');
+        let parent;
+        parts.pop();
+        if (parts.length > 1) {
+            parent = parts.join("/") + ".sy"
+        } else {
+            parent = "/"
+        }
+        logLog("listDocsByPath-parent", parent);
+
+        // 列出同级文档,查找相邻文档
+        request(
+            "/api/filetree/listDocsByPath",
+            {
+                notebook: protyle.notebookId,
+                path: parent,
+            }
+        ).then(res => {
+            logLog("listDocsByPath-data", res);
+            // 查找相邻
+            const index = res.files.findIndex(item => item.id === protyle.block.rootID);
+            const filePrev = index > 0 ? res.files[index-1].name : null;
+            const fileNext = index < res.files.length - 1 ? res.files[index + 1].name : null;
+            logLog("listDocsByPath-filePrev", filePrev);
+            logLog("listDocsByPath-fileNext", fileNext);
+        });
     });
 }

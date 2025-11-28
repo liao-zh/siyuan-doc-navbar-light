@@ -1,7 +1,7 @@
 // 制作和插入面包屑
 
-import { type IProtyle, openTab, Plugin } from "siyuan";
-import { getHPathByID, getNotebookConf } from "@/utils/api"
+import { App, type IProtyle, openTab, Plugin } from "siyuan";
+import { request, getHPathByID, getNotebookConf } from "@/utils/api"
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
@@ -16,28 +16,59 @@ interface IProtyleInfo {
     hpath: string;
     pathItems: string[];
     hpathItems: string[];
+    docPrev: string | null;
+    docNext: string | null;
 }
 
+// 获取相邻文档
+async function getAdjacentDocs(docId: string, notebookId: string, path: string): Promise<{docPrev: string | null, docNext: string | null}> {
+    // 得到父级的路径
+    const parts = path.split('/');
+    parts.pop();
+    const parent = (parts.length > 1)? parts.join("/")+".sy" : "/";
+
+    // 列出同级文档
+    const data = await request(
+        "/api/filetree/listDocsByPath",
+        {
+            notebook: notebookId,
+            path: parent,
+        }
+    )
+
+    // 查找相邻文档
+    const index = data.files.findIndex(item => item.id === docId);
+    const docPrev = index > 0 ? data.files[index-1].name : null;
+    const docNext = index < data.files.length - 1 ? data.files[index + 1].name : null;
+
+    return {docPrev, docNext};
+}
+
+// 从protyle中获取所需信息
 async function parseProtyle(protyle: IProtyle): Promise < IProtyleInfo > {
-    // ids
+    // 基本信息
     const docId = protyle.block.rootID;
     const notebookId = protyle.notebookId;
+    const path = protyle.path;
 
-    // requests
-    const [notebookConf, hpath] = await Promise.all([
+    // 异步调用API获取信息
+    const [notebookConf, hpath, docPrevNext] = await Promise.all([
         getNotebookConf(notebookId),
-        getHPathByID(docId)
+        getHPathByID(docId),
+        getAdjacentDocs(docId, notebookId, path),
     ]);
 
-    // notebook
+    // 笔记本
     const notebook = notebookConf.conf.name;
 
-    // paths
-    const path = protyle.path;
+    // 路径
     const pathItems = path.replace(/\.sy$/, '').split("/").slice(1);
     const hpathItems = hpath.split("/").slice(1);
 
-    // combination
+    // 相邻文档
+    const {docPrev, docNext} = docPrevNext;
+
+    // 整合
     const result: IProtyleInfo = {
         docId,
         notebookId,
@@ -46,6 +77,8 @@ async function parseProtyle(protyle: IProtyle): Promise < IProtyleInfo > {
         notebook,
         pathItems,
         hpathItems,
+        docPrev,
+        docNext,
     }
     return result
 }
@@ -74,7 +107,7 @@ export class ContentInjector {
         // 解析protyle
         const protyleInfo = await parseProtyle(protyle);
 
-        logger.logDebug("protyleInfo", protyleInfo);
+        logger.logLog("protyleInfo", protyleInfo);
 
         // 构建容器
         let div = document.createElement("div");
@@ -146,14 +179,7 @@ export class ContentInjector {
 
         // 添加点击事件
         if (isFile) {
-            elem.addEventListener("click", (e) => {
-                e.stopPropagation();
-                logger.logLog("clickBreadcrumbItem", id);
-                openTab({
-                    app: this.plugin.app,
-                    doc: { id, },
-                });
-            });
+            elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
         }
 
 
@@ -175,7 +201,22 @@ export class ContentInjector {
         return svg;
     }
 
-    createNeighbor() {
+    createNeighbor(protyleInfo: IProtyleInfo) {
 
     }
+
+}
+
+function createSvg(className: string, icon: string) {
+
+}
+
+function clickHandler(app: App, id: string, e: MouseEvent) {
+    e.stopPropagation();
+    openTab({
+        app: app,
+        doc: {
+            id,
+        },
+    });
 }
