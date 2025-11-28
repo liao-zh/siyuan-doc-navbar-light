@@ -2,6 +2,7 @@
 # 思源笔记-简单面包屑插件
 
 作者：Liao-ZH
+
 GITEE仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc-breadcrumb-light)
 
 [English](./README.md)
