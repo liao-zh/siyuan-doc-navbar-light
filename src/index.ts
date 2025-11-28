@@ -8,7 +8,7 @@ import "@/index.scss";
 import { CONSTANTS } from "./constants";
 import * as logger from "./utils/logger";
 import { setPluginInstance } from "./utils/pluginInstance";
-import EventHandler from "./worker/eventHandler";
+import { EventHandler } from "./worker/eventHandler";
 import * as test from "./test/test";
 
 const STORAGE_NAME = "menu-config";
