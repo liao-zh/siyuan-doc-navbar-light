@@ -68,9 +68,9 @@ async function getAdjacentDocs(docId: string, notebookId: string, path: string):
 
     // 查找相邻文档
     const index = data.files.findIndex(item => item.id === docId);
-    const prevName = index > 0 ? data.files[index - 1].name : null;
+    const prevName = index > 0 ? data.files[index - 1].name.replace(/\.sy$/, '') : null;
     const prevId = index > 0 ? data.files[index - 1].id : null;
-    const nextName = index < data.files.length - 1 ? data.files[index + 1].name : null;
+    const nextName = index < data.files.length - 1 ? data.files[index + 1].name.replace(/\.sy$/, '') : null;
     const nextId = index < data.files.length - 1 ? data.files[index + 1].id : null;
 
     const result = { prevName, prevId, nextName, nextId };
@@ -112,9 +112,14 @@ export class ContentInjector {
         // 构建面包屑
         div.appendChild(this.createBreadcrumb(protyleInfo));
 
-        // 构建相邻文档
+        let space = document.createElement("span");
+        space.classList.add("protyle-breadcrumb__space");
+        div.appendChild(space);
 
-        // 插入容器
+        // 构建相邻文档
+        const { elemPrev, elemNext } = await this.createAdjacent(protyleInfo);
+        div.appendChild(elemPrev);
+        div.appendChild(elemNext);
     }
 
     // 构建文档面包屑HTML元素
@@ -154,12 +159,6 @@ export class ContentInjector {
         let svg = createSvg("popover__block", iconName);
         elem.appendChild(svg);
 
-        // 如果是文档而非笔记本，添加id
-        if (isFile) {
-            elem.dataset.nodeId = id;
-            svg.dataset.id = id;
-        }
-
         // 构建文本元素
         let text = document.createElement("span");
         text.classList.add("protyle-breadcrumb__text");
@@ -167,11 +166,12 @@ export class ContentInjector {
         text.innerHTML = name;
         elem.appendChild(text);
 
-        // 添加点击事件
+        // 如果是文档而非笔记本，添加id和点击事件
         if (isFile) {
+            elem.dataset.nodeId = id;
+            svg.dataset.id = id;
             elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
         }
-
 
         return elem;
     }
@@ -181,8 +181,48 @@ export class ContentInjector {
         return createSvg("protyle-breadcrumb__arrow", "#iconRight");
     }
 
-    createNeighbors(protyleInfo: IProtyleInfo) {
+    // 构建相邻文档
+    async createAdjacent(protyleInfo: IProtyleInfo) {
+        // 查找相邻文档
+        const adjDocs = await getAdjacentDocs(protyleInfo.docId, protyleInfo.notebookId, protyleInfo.path);
+        logger.logLog("adjDocs", adjDocs);
 
+        const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "上一篇", "#iconBack");
+        const elemNext = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "下一篇", "#iconForward");
+
+        return { elemPrev, elemNext };
+    }
+
+    createAdjacentItem(id: string | null, name: string | null, displayName: string, iconName: string): HTMLElement {
+        // 构建容器
+        let elem = document.createElement("span");
+        elem.classList.add("protyle-breadcrumb__item");
+
+        // 构建xvg和xlink
+        let svg = createSvg("popover__block", iconName);
+        elem.appendChild(svg);
+
+        // 构建文本元素
+        let text = document.createElement("span");
+        text.classList.add("protyle-breadcrumb__text");
+        text.innerHTML = displayName;
+        elem.appendChild(text);
+
+        // 添加id
+        if (id !== null) {
+            elem.dataset.nodeId = id;
+            svg.dataset.id = id;
+            text.title = name;
+            elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
+            elem.style.cursor = "pointer";
+        } else {
+            elem.style.opacity = "0.5";
+            elem.style.cursor = "default";
+        }
+
+        // 添加点击事件
+
+        return elem;
     }
 
 }
@@ -192,9 +232,11 @@ function createSvg(className: string, iconName: string): SVGElement {
     const nsSvg = "http://www.w3.org/2000/svg";
     const nsXlink = "http://www.w3.org/1999/xlink";
 
-    // 构建xvg和xlink
+    // 构建xvg
     let svg = document.createElementNS(nsSvg, "svg");
     svg.classList.add(className);
+
+    // 构建xlink
     let xlink = document.createElementNS(nsSvg, "use");
     xlink.setAttributeNS(nsXlink, "xlink:href", iconName);
     svg.appendChild(xlink);
