@@ -14,9 +14,12 @@ export class ContentInjector {
     // 向指定protyle添加元素
     // DOM：面包屑-空格-相邻文档，复用思源的元素类
     // @param protyle 要添加元素的protyle
-    // @param replace 是否替换已存在的元素
-    async apply(protyle: IProtyle, replace: boolean = false) {
-        // 判断是否需要执行任务，或要移除已经插入的元素
+    // @param replace 是否替换已存在元素
+    async apply(protyle: IProtyle, replace: boolean) {
+        // 移除可能的已插入元素
+        // removeInjectedFromProtyle(protyle);
+
+        // 判断是否需要移除元素，以及是否跳过任务
         if (existInjectedInProtyle(protyle)) {
             // 存在已插入元素，且要替换，则移除已插入元素
             if (replace) {
@@ -27,12 +30,11 @@ export class ContentInjector {
                 return;
             }
         }
-        // 不存在已插入元素，则执行任务
 
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
         if (!blockBreadcrumb) {
-            logger.logDebug("ContentInjector/apply: 不存在块面包屑，退出");
+            logger.logDebug("插入元素：不存在块面包屑，退出");
             return;
         }
 
@@ -40,7 +42,7 @@ export class ContentInjector {
         this.plugin =  getPluginInstance();
         // 解析protyle
         const protyleInfo = await getProtyleInfo(protyle);
-        logger.logDebug("ContentInjector/apply: protyle信息", protyleInfo);
+        logger.logDebug("插入元素：protyle信息", protyleInfo);
 
         // 构建整个面包屑容器
         const div = document.createElement("div");

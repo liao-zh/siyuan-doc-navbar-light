@@ -65,13 +65,13 @@ export class EventHandler {
     }
 
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
-        logger.logDebug("loaded-protyle-static", event);
+        logger.logDebug("触发事件：loaded-protyle-static", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
 
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
-        logger.logDebug("switch-protyle", event);
+        logger.logDebug("触发事件：switch-protyle", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
@@ -81,7 +81,7 @@ export class EventHandler {
         const cmdType = ["moveDoc", "rename", "removeDoc"];
         // 仅处理移动、重命名、删除文档事件
         if (cmdType.includes(event.detail.cmd)) {
-            logger.logDebug(`ws-main(${cmdType.join('/')})"`, event);
+            logger.logDebug(`触发事件：ws-main(${event.detail.cmd})"`, event);
             await this.handleProtyleAllShowing();
         }
     }
