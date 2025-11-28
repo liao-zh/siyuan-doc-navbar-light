@@ -15,9 +15,9 @@
   ],
   "frontends": [
     "desktop",
-    "mobile",
+    // "mobile",
     "browser-desktop",
-    "browser-mobile",
+    // "browser-mobile",
     "desktop-window"
   ],
   "displayName": {
