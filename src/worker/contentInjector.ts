@@ -173,6 +173,10 @@ export class ContentInjector {
             elem.dataset.nodeId = id;
             svg.dataset.id = id;
             elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
+            elem.style.cursor = "pointer";
+        } else {
+            // elem.style.opacity = CONSTANTS.STYLE_DISABLED_OPACITY;
+            elem.style.cursor = "default";
         }
 
         return elem;
@@ -218,7 +222,7 @@ export class ContentInjector {
             elem.addEventListener("click", clickHandler.bind(this, this.plugin.app, id));
             elem.style.cursor = "pointer";
         } else {
-            elem.style.opacity = "0.5";
+            elem.style.opacity = CONSTANTS.STYLE_DISABLED_OPACITY;
             elem.style.cursor = "default";
         }
 
