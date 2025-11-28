@@ -81,8 +81,6 @@ export class EventHandler {
 // 从文档层级导航插件复制而来
 function getAllShowingDocId(): string[] {
     const elemList = window.document.querySelectorAll("[data-type=wnd] .protyle.fn__flex-1:not(.fn__none) .protyle-background");
-    const result = [].map.call(elemList, function (elem: Element) {
-        return elem.getAttribute("data-node-id");
-    });
+    const result = Array.from(elemList).map(elem => elem.getAttribute("data-node-id"));
     return result
 }

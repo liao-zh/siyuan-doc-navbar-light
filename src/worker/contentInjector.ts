@@ -107,7 +107,7 @@ export class ContentInjector {
     async createAdjacent(protyleInfo: IProtyleInfo) {
         // 查找相邻文档
         const adjDocs = await getAdjacentDocs(protyleInfo.docId, protyleInfo.notebookId, protyleInfo.path);
-        logger.logDebug("ContentInjector/createAdjacent: 相邻文档", adjDocs);
+        // logger.logDebug("ContentInjector/createAdjacent: 相邻文档", adjDocs);
 
         // 构建上一篇和下一篇
         const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
