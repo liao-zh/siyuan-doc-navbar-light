@@ -218,9 +218,9 @@ function clickHandler(app: App, id: string, e: MouseEvent) {
         doc: {
             id,
         },
-        // 条件属性：只有在按下alt或shift键时才添加position属性
-        // 如果两个键都按下，后面属性覆盖前面，优先alt
-        ...(e.shiftKey && { position: "bottom" }),
-        ...(e.altKey && { position: "right" }),
+        // 条件属性：只有在按下辅助按键时才添加position属性
+        // 如果多个键同时按下，后面属性覆盖前面
+        ...(e.altKey && { position: "right" }), // 用alt，与思源默认行为一致
+        // ...(e.shiftKey && { position: "bottom" }),
     });
 }
