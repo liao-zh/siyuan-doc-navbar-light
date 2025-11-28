@@ -1,8 +1,8 @@
 // 制作和插入面包屑
 
 import { App, type IProtyle, openTab, Plugin } from "siyuan";
-import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/processProtyle";
-import { removeInjectedFromProtyle } from "@/utils/processDOM";
+import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/protyleUtils";
+import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";

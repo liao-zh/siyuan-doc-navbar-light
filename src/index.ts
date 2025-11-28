@@ -8,7 +8,7 @@ import "@/index.scss";
 import { CONSTANTS } from "./constants";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { EventHandler } from "./worker/eventHandler";
-import { removeInjected } from "./utils/processDOM";
+import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
 import * as test from "./test/test";
 

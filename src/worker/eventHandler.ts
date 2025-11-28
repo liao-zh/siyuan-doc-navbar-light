@@ -6,7 +6,7 @@ import {
 } from "siyuan"
 import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
-import { getAllShowingDocId, removeInjected } from "@/utils/processDOM";
+import { getAllShowingDocId, removeInjected } from "@/utils/DOMUtils";
 import * as logger from "@/utils/logger";
 
 export class EventHandler {
