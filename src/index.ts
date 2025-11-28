@@ -12,25 +12,18 @@ import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
 import * as test from "./test/test";
 
-const STORAGE_NAME = "menu-config";
-
 export default class DocBreadcrumbLight extends Plugin {
 
-    private isMobile: boolean;
     private eventHandler: EventHandler;
 
     async onload() {
-        this.data[STORAGE_NAME] = { readonlyText: "Readonly" };
-
         logger.logInfo("加载插件");
+
+        // 设置插件实例
         setPluginInstance(this);
 
         // 事件处理器初始化
         this.eventHandler = new EventHandler();
-
-        const frontEnd = getFrontend();
-        this.isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile";
-
     }
 
     onLayoutReady() {
@@ -51,8 +44,9 @@ export default class DocBreadcrumbLight extends Plugin {
         removeInjected();
     }
 
-    uninstall() {
+    async uninstall() {
         logger.logInfo("卸载插件");
+        await this.onunload();
     }
 
 }

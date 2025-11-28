@@ -4,6 +4,7 @@ import {
     type IEventBusMap, type IProtyle,
     getAllEditor,
 } from "siyuan"
+import { TaskProcessor } from "@/worker/taskProcessor";
 import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { getAllShowingDocId, removeInjected } from "@/utils/DOMUtils";
@@ -11,6 +12,7 @@ import * as logger from "@/utils/logger";
 
 export class EventHandler {
     private plugin: Plugin;
+    private taskProcessor: TaskProcessor;
     private handlerList: Record<string, (arg1: CustomEvent)=>void> = {
         "loaded-protyle-static": this.handleLoadedProtyleStatic.bind(this),
         "switch-protyle": this.handleSwitchProtyle.bind(this),
@@ -19,6 +21,7 @@ export class EventHandler {
 
     constructor() {
         this.plugin = getPluginInstance();
+        this.taskProcessor = new TaskProcessor();
     }
 
     bindHandler() {
@@ -29,18 +32,23 @@ export class EventHandler {
         // 首次加载时处理已经打开的文档
         removeInjected();
         this.handleProtyleAllShowing();
+        // 清除任务处理器
+        this.taskProcessor.clearAllTasks();
     }
 
     unbindHandler() {
+        // 解绑所有事件处理器
         for (let key in this.handlerList) {
             this.plugin.eventBus.off(key as keyof IEventBusMap, this.handlerList[key]);
         }
+        // 清除任务处理器
+        this.taskProcessor.clearAllTasks();
     }
 
-    async handleProtyle(protyle: IProtyle, replace: boolean = false) {
-        const contentInjector = new ContentInjector();
-        await contentInjector.apply(protyle, replace);
-    }
+    // async handleProtyle(protyle: IProtyle, replace: boolean = false) {
+    //     const contentInjector = new ContentInjector();
+    //     await contentInjector.apply(protyle);
+    // }
 
     async handleProtyleAllShowing() {
         // 在所有打开的protyle中，仅处理显示着的文档
@@ -50,7 +58,7 @@ export class EventHandler {
         if (ids != null && ids.length > 0) {
             for (let editor of allEditor) {
                 if (ids.includes(editor.protyle.block.rootID)) {
-                    await this.handleProtyle(editor.protyle, true);
+                    this.taskProcessor.addTask({protyle: editor.protyle, replace: true});
                 }
             }
         }
@@ -59,16 +67,17 @@ export class EventHandler {
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
         logger.logDebug("loaded-protyle-static", event);
         const protyle = event.detail.protyle;
-        await this.handleProtyle(protyle, false);
+        this.taskProcessor.addTask({protyle, replace: false});
     }
 
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
         logger.logDebug("switch-protyle", event);
         const protyle = event.detail.protyle;
-        await this.handleProtyle(protyle, true);
+        this.taskProcessor.addTask({protyle, replace: false});
     }
 
     async handleWSMain(event: CustomEvent<IEventBusMap["ws-main"]>) {
+        // logger.logDebug("ws-main事件：", event.detail.cmd);
         const cmdType = ["moveDoc", "rename", "removeDoc"];
         // 仅处理移动、重命名、删除文档事件
         if (cmdType.includes(event.detail.cmd)) {
