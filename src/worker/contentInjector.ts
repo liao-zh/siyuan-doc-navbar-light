@@ -1,81 +1,13 @@
 // 制作和插入面包屑
 
 import { App, type IProtyle, openTab, Plugin } from "siyuan";
-import { request, getHPathByID, getNotebookConf } from "@/utils/api"
+import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/processProtyle";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
 
 
-// 从protyle中提取所需属性
-interface IProtyleInfo {
-    docId: string;
-    notebookId: string;
-    notebookName: string;
-    path: string;
-    hpath: string;
-}
 
-// 从protyle中获取所需信息
-async function parseProtyle(protyle: IProtyle): Promise < IProtyleInfo > {
-    // 基本信息
-    const docId = protyle.block.rootID;
-    const notebookId = protyle.notebookId;
-    const path = protyle.path;
-
-    // 异步调用API获取信息
-    const [notebookConf, hpath] = await Promise.all([
-        getNotebookConf(notebookId),
-        getHPathByID(docId),
-    ]);
-
-    // 笔记本
-    const notebookName = notebookConf.conf.name;
-
-    // 整合
-    const result: IProtyleInfo = {
-        docId,
-        notebookId,
-        notebookName,
-        path,
-        hpath,
-    }
-    return result
-}
-
-interface IAdjacentDocs {
-    prevId: string | null;
-    prevName: string | null;
-    nextId: string | null;
-    nextName: string | null;
-}
-
-// 获取相邻文档
-async function getAdjacentDocs(docId: string, notebookId: string, path: string): Promise<IAdjacentDocs> {
-    // 得到父级的路径
-    const parts = path.split('/');
-    parts.pop();
-    const parent = (parts.length > 1) ? parts.join("/") + ".sy" : "/";
-
-    // 列出同级文档
-    const data = await request(
-        "/api/filetree/listDocsByPath",
-        {
-            notebook: notebookId,
-            path: parent,
-        }
-    )
-
-    // 查找相邻文档
-    const index = data.files.findIndex(item => item.id === docId);
-    const prevName = index > 0 ? data.files[index - 1].name.replace(/\.sy$/, '') : null;
-    const prevId = index > 0 ? data.files[index - 1].id : null;
-    const nextName = index < data.files.length - 1 ? data.files[index + 1].name.replace(/\.sy$/, '') : null;
-    const nextId = index < data.files.length - 1 ? data.files[index + 1].id : null;
-
-    const result = { prevName, prevId, nextName, nextId };
-    return result
-}
 
 export class ContentInjector {
     private plugin: Plugin
@@ -99,7 +31,7 @@ export class ContentInjector {
         }
 
         // 解析protyle
-        const protyleInfo = await parseProtyle(protyle);
+        const protyleInfo = await getProtyleInfo(protyle);
 
         logger.logLog("protyle", protyle);
         logger.logLog("protyleInfo", protyleInfo);
