@@ -112,8 +112,10 @@ export class ContentInjector {
         // 构建面包屑
         div.appendChild(this.createBreadcrumb(protyleInfo));
 
+        // 添加空格
         let space = document.createElement("span");
         space.classList.add("protyle-breadcrumb__space");
+        space.style.maxWidth = "12px"
         div.appendChild(space);
 
         // 构建相邻文档
