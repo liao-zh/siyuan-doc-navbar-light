@@ -59,8 +59,7 @@ export class TaskProcessor {
     // 处理单个任务
     private async processTask(task: ITask): Promise<void> {
         const contentInjector = new ContentInjector();
-        // await contentInjector.apply(task.protyle);
-        await contentInjector.apply(task.protyle, task.replace);
+        await contentInjector.apply(task.protyle);
     }
 
     //  清除所有任务

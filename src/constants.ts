@@ -10,7 +10,7 @@ export class CONSTANTS {
 
     // HTML元素样式
     public static readonly STYLE_DISABLED_OPACITY: string = "0.5";
-    public static readonly STYLE_BREADCRUMBITEM_MAXWIDTH: string = "100px";
+    public static readonly STYLE_BREADCRUMBITEM_MAXWIDTH: string = "160px";
     public static readonly STYLE_SPACE_MAXWIDTH: string = "12px";
-    public static readonly STYLE_ADJACENT_MINWIDTH: string = "150px";
+    public static readonly STYLE_ADJACENT_MINWIDTH: string = "160px";
 }

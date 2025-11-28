@@ -15,21 +15,22 @@ export class ContentInjector {
     // DOM：面包屑-空格-相邻文档，复用思源的元素类
     // @param protyle 要添加元素的protyle
     // @param replace 是否替换已存在元素
-    async apply(protyle: IProtyle, replace: boolean) {
+    async apply(protyle: IProtyle) {
         // 移除可能的已插入元素
-        // removeInjectedFromProtyle(protyle);
+        removeInjectedFromProtyle(protyle);
 
         // 判断是否需要移除元素，以及是否跳过任务
-        if (existInjectedInProtyle(protyle)) {
-            // 存在已插入元素，且要替换，则移除已插入元素
-            if (replace) {
-                removeInjectedFromProtyle(protyle);
-            }
-            // 存在已插入元素，且不替换，则不执行任务
-            else {
-                return;
-            }
-        }
+        // 取消原因：跳过会有漏洞
+        // if (existInjectedInProtyle(protyle)) {
+        //     // 存在已插入元素，且要替换，则移除已插入元素
+        //     if (replace) {
+        //         removeInjectedFromProtyle(protyle);
+        //     }
+        //     // 存在已插入元素，且不替换，则不执行任务
+        //     else {
+        //         return;
+        //     }
+        // }
 
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
