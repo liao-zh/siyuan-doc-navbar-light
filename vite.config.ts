@@ -2,7 +2,6 @@ import { resolve } from "path"
 import { defineConfig, loadEnv } from "vite"
 import { viteStaticCopy } from "vite-plugin-static-copy"
 import livereload from "rollup-plugin-livereload"
-import { svelte } from "@sveltejs/vite-plugin-svelte"
 import zipPack from "vite-plugin-zip-pack";
 import fg from 'fast-glob';
 
@@ -26,7 +25,6 @@ export default defineConfig({
     },
 
     plugins: [
-        svelte(),
 
         vitePluginYamlI18n({
             inDir: 'public/i18n',
@@ -111,7 +109,7 @@ export default defineConfig({
  * Clean up some dist files after compiled
  * @author frostime
  * @param options:
- * @returns 
+ * @returns
  */
 function cleanupDistFiles(options: { patterns: string[], distDir: string }) {
     const {

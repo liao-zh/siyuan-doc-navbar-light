@@ -1,6 +1,6 @@
 {
   "name": "plugin-doc-breadcrumb-light",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "description": "A light breadcrumb plugin for SiYuan",
   "repository": "",
@@ -16,8 +16,6 @@
     "make-install": "vite build && node --no-warnings ./scripts/make_install.js"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@tsconfig/svelte": "^4.0.1",
     "@types/node": "^24.10.1",
     "cross-env": "^10.1.0",
     "fast-glob": "^3.3.3",
@@ -27,7 +25,6 @@
     "rollup-plugin-livereload": "^2.0.5",
     "sass": "^1.94.2",
     "siyuan": "1.1.5",
-    "svelte": "^4.2.20",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
