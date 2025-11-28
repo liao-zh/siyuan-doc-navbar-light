@@ -3,7 +3,7 @@
 
 作者：Liao-ZH
 
-GITEE仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc-breadcrumb-light)
+Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc-breadcrumb-light)
 
 [English](./README.md)
 
