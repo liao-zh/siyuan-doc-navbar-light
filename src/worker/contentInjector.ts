@@ -84,28 +84,35 @@ export class ContentInjector {
             this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook")
         );
 
-        // 添加箭头和路径上的文档
-        for (let i = 0; i < pathItems.length; i++) {
+        // 添加中间层级的文档
+        for (let i = 0; i < pathItems.length - 1; i++) {
             div.appendChild(this.createBreadcrumbArrow());
             div.appendChild(
-                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc")
-            )
+                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle")
+            );
         }
+
+        // 添加最后一层文档
+        div.appendChild(this.createBreadcrumbArrow());
+        div.appendChild(
+            this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last")
+        );
 
         return div;
     }
 
     // 构建文档面包屑HTML元素中的每个层级
     // DOM：span容器/{图标-文本}
-    createBreadcrumbItem(id: string, name: string, type: "doc" | "notebook"): HTMLElement {
+    // @param type：面包屑项类型，notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档
+    createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): HTMLElement {
         const elem = createItem({
             app: this.plugin.app,
             id,
             name,
             innerHTML: name,
-            iconName: type === "doc" ? "#iconFile" : "#iconFolder",
-            isClickable: type === "doc", // 文档才可点击
-            maxWidth: type === "doc" ? CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 文档项宽度限制
+            iconName: type === "notebook" ? "#iconFolder" : "#iconFile", // 笔记本用文件夹图标，文档用文件图标
+            isClickable: type !== "notebook", // 除了笔记本，都可以点击
+            maxWidth: type === "doc-middle" ? CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
         })
         return elem;
     }

@@ -1,6 +1,6 @@
 {
   "name": "plugin-doc-breadcrumb-light",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "A light breadcrumb plugin for SiYuan",
   "repository": "https://gitee.com/liao-zh/plugin-doc-breadcrumb-light",
