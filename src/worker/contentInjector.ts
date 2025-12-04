@@ -282,8 +282,9 @@ function openDocHandler(docId: string, event: MouseEvent) {
         },
         // 条件属性：只有在按下辅助按键时才添加position属性
         // 如果多个键同时按下，后面属性覆盖前面
-        ...(event.altKey && { position: "right" }), // 用alt，与思源默认行为一致
+        ...(event.altKey && { position: "right" }), // alt+单击时，在右侧打开页签
         // ...(e.shiftKey && { position: "bottom" }),
+        keepCursor: event.ctrlKey? true : false, // ctrl+单击时，在后台打开页签
     });
 }
 

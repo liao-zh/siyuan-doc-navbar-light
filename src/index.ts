@@ -1,11 +1,6 @@
-import {
-    Plugin,
-    showMessage,
-    getFrontend,
-} from "siyuan";
+import { Plugin } from "siyuan";
 import "@/index.scss";
 
-import { CONSTANTS } from "./constants";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { EventHandler } from "./worker/eventHandler";
 import { removeInjected } from "./utils/DOMUtils";
@@ -33,7 +28,7 @@ export default class DocBreadcrumbLight extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        // test.testListDocs2();
+        // test.testEventbus();
     }
 
     async onunload() {
