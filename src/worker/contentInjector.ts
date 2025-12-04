@@ -272,6 +272,8 @@ function openDocHandler(docId: string, event: MouseEvent) {
     // 阻止事件其他行为
     event.stopPropagation();
 
+    logger.logDebug(`点击打开文档：docId=${docId}`);
+
     // 打开新标签页
     openTab({
         app: getPluginInstance().app,
@@ -296,6 +298,8 @@ async function openChildDocsHandler(notebookId: string, path: string, event: Mou
     event.stopPropagation();
     event.preventDefault();
 
+    logger.logDebug(`打开子文档菜单：notebookId=${notebookId}, path=${path}`);
+
     // 获取信息
     const i18n = getPluginInstance().i18n;
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
@@ -305,7 +309,8 @@ async function openChildDocsHandler(notebookId: string, path: string, event: Mou
 
     // 构建菜单
     const menu = new Menu();
-    const itemStyle = `display: inline-block; max-width: ${CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH}; overflow: clip; text-overflow: ellipsis;`;
+    // const itemStyle = `display: inline-block; max-width: ${CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH}; overflow: clip; text-overflow: ellipsis;`;
+    const itemStyle = "";
     // 对每个子文档构建菜单项目
     for (let i = 0; i < childDocs.length; i++) {
         const childDoc = childDocs[i];
