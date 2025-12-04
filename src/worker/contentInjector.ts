@@ -302,15 +302,25 @@ async function openChildDocsHandler(notebookId: string, path: string, event: Mou
 
     // 获取信息
     const i18n = getPluginInstance().i18n;
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    // 计算位置
+    // 当前元素（面包屑箭头）的位置信息
+    const currentTarget = event.currentTarget as HTMLElement;
+    const rect = currentTarget.getBoundingClientRect();
+    // 计算菜单最大宽度 = 相邻文档元素最右侧位置 - 面包屑箭头左侧位置
+    const nextTarget = currentTarget.parentElement.nextElementSibling; // 获取“相邻文档”元素
+    const rectNext = nextTarget.getBoundingClientRect();
+    const menuMaxWidth = rectNext.right - rect.left;
 
     // 获取子文档
     const childDocs = await getChildDocs(notebookId, path);
 
     // 构建菜单
     const menu = new Menu();
-    // const itemStyle = `display: inline-block; max-width: ${CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH}; overflow: clip; text-overflow: ellipsis;`;
-    const itemStyle = "";
+    // 设置菜单项文本最大宽度
+    const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
+    // 不设置文本项最大宽度
+    // const itemStyle = "";
     // 对每个子文档构建菜单项目
     for (let i = 0; i < childDocs.length; i++) {
         const childDoc = childDocs[i];
@@ -333,7 +343,8 @@ async function openChildDocsHandler(notebookId: string, path: string, event: Mou
     // 设置菜单属性
     const menuElement = menu.element as HTMLElement;
     if (menuElement) {
-        menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
+        // menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
+        menuElement.style.maxWidth = `${menuMaxWidth}px`;
     }
 
     // 设置打开菜单的位置：菜单左上角=面包屑箭头的左下角
