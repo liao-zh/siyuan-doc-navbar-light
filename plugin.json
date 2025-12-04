@@ -2,7 +2,7 @@
   "name": "plugin-doc-breadcrumb-light",
   "author": "liao-zh",
   "url": "https://gitee.com/liao-zh/plugin-doc-breadcrumb-light",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "minAppVersion": "3.0.12",
   "backends": [
     "windows",

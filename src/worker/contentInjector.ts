@@ -318,9 +318,9 @@ async function openChildDocsHandler(notebookId: string, path: string, event: Mou
     // 构建菜单
     const menu = new Menu();
     // 设置菜单项文本最大宽度
-    const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
+    // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
     // 不设置文本项最大宽度
-    // const itemStyle = "";
+    const itemStyle = "";
     // 对每个子文档构建菜单项目
     for (let i = 0; i < childDocs.length; i++) {
         const childDoc = childDocs[i];
