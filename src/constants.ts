@@ -5,8 +5,6 @@ export class CONSTANTS {
 
     // 自定义名称
     public static readonly CLASS_CONTAINER: string = "lzh-dbl-container";
-    public static readonly LABEL_ADJACENT_PREV: string = "上一篇";
-    public static readonly LABEL_ADJACENT_NEXT: string = "下一篇";
 
     // HTML元素样式
     public static readonly STYLE_DISABLED_OPACITY: string = "0.5";
