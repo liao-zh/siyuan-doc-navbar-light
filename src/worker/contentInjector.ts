@@ -1,7 +1,7 @@
 // 制作和插入面包屑
 
-import { App, type IProtyle, openTab, Plugin } from "siyuan";
-import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/protyleUtils";
+import { type IProtyle, openTab, Menu } from "siyuan";
+import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs } from "@/utils/protyleUtils";
 import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
@@ -12,8 +12,6 @@ import * as logger from "@/utils/logger";
  * 内容注入器
  */
 export class ContentInjector {
-    private plugin: Plugin
-
     /**
      * 向指定 protyle 添加元素
      * DOM：面包屑-空格-相邻文档，复用思源的元素类
@@ -30,8 +28,6 @@ export class ContentInjector {
             return;
         }
 
-        // 获取插件实例
-        this.plugin =  getPluginInstance();
         // 解析protyle
         const protyleInfo = await getProtyleInfo(protyle);
         logger.logDebug("插入元素：protyle信息", protyleInfo);
@@ -75,22 +71,26 @@ export class ContentInjector {
         div.classList.add("protyle-breadcrumb__bar", "protyle-breadcrumb__bar--nowrap");
 
         // 添加笔记本
-        div.appendChild(
-            this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook")
+        let pathI = "/";
+        div.append(
+            this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook"),
+            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
         );
 
         // 添加中间层级的文档
         for (let i = 0; i < pathItems.length - 1; i++) {
-            div.appendChild(this.createBreadcrumbArrow());
-            div.appendChild(
-                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle")
+            pathI = "/" + pathItems.slice(0, i+1).join("/") + ".sy";
+            div.append(
+                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle"),
+                this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
             );
         }
 
         // 添加最后一层文档
-        div.appendChild(this.createBreadcrumbArrow());
-        div.appendChild(
-            this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last")
+        pathI = "/" + pathItems.join("/") + ".sy";
+        div.append(
+            this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last"),
+            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
         );
 
         return div;
@@ -106,7 +106,6 @@ export class ContentInjector {
      */
     createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): HTMLElement {
         const elem = createItem({
-            app: this.plugin.app,
             id,
             name,
             innerHTML: name,
@@ -119,10 +118,20 @@ export class ContentInjector {
 
     /**
      * 构建面包屑层级之间的箭头
-     * @returns {SVGElement} - 面包屑箭头元素
+     * @returns {HTMLElement} - 面包屑箭头元素
      */
-    createBreadcrumbArrow(): SVGElement {
-        return createSvg("protyle-breadcrumb__arrow", "#iconRight");
+    createBreadcrumbArrow(notebookId: string, path: string): HTMLElement {
+        // 创建span容器包装svg
+        const elem = document.createElement("span");
+        elem.style.cursor = "pointer";
+
+        // 创建svg图标
+        const svg = createSvg("protyle-breadcrumb__arrow", "#iconRight");
+        elem.appendChild(svg);
+
+        // 点击事件：打开子文档菜单
+        elem.addEventListener("click", openChildDocsHandler.bind(null, notebookId, path));
+        return elem;
     }
 
     /**
@@ -144,7 +153,6 @@ export class ContentInjector {
         div.style.minWidth = CONSTANTS.STYLE_ADJACENT_MINWIDTH;
         // 构建假元素，应对有些外观样式（如Savor）会将第一个元素的图标改掉
         const elemShaddow = createItem({
-            app: this.plugin.app,
             id: null,
             name: null,
             innerHTML: "",
@@ -153,18 +161,16 @@ export class ContentInjector {
             naOpacity: "0",
         })
         // 容器加入假元素、上一篇、下一篇
-        div.appendChild(elemShaddow);
-        div.appendChild(elemPrev);
-        div.appendChild(elemNext);
+        div.append(elemShaddow, elemPrev, elemNext);
         return div;
     }
 
     createAdjacentItem(id: string, name: string , type: "prev" | "next"): HTMLElement {
+        const i18n = getPluginInstance().i18n;
         const elem = createItem({
-            app: this.plugin.app,
             id,
             name,
-            innerHTML: type === "prev" ? CONSTANTS.LABEL_ADJACENT_PREV : CONSTANTS.LABEL_ADJACENT_NEXT,
+            innerHTML: type === "prev" ? i18n.adjDocPrev : i18n.adjDocNext,
             iconName: type === "prev" ? "#iconBack" : "#iconForward",
             isClickable: (id !== null), // 存在相邻文档时才可点击
             naOpacity: CONSTANTS.STYLE_DISABLED_OPACITY, // 不可点击时灰化
@@ -187,7 +193,6 @@ export class ContentInjector {
  * @returns {HTMLElement} - 面包屑项元素
  */
 function createItem({
-        app,
         id,
         name,
         innerHTML,
@@ -196,7 +201,6 @@ function createItem({
         maxWidth,
         naOpacity,
     }: {
-        app: App;
         id: string;
         name: string;
         innerHTML: string;
@@ -205,6 +209,7 @@ function createItem({
         maxWidth?: string;
         naOpacity?: string;
     }): HTMLElement {
+
     // 构建容器
     const elem = document.createElement("span");
     elem.classList.add("protyle-breadcrumb__item");
@@ -225,7 +230,7 @@ function createItem({
     if (isClickable) {
         elem.dataset.nodeId = id;
         svg.dataset.id = id;
-        elem.addEventListener("click", clickHandler.bind(null, app, id));
+        elem.addEventListener("click", openDocHandler.bind(null, id));
         elem.style.cursor = "pointer";
     } else {
         naOpacity && (elem.style.opacity = naOpacity);
@@ -259,22 +264,76 @@ function createSvg(className: string, iconName: string): SVGElement {
 }
 
 /**
- * 点击事件处理函数
- * @param app - 思源插件app
- * @param id - 文档id
+ * 点击事件：打开文档
+ * @param docId - 文档id
  * @param event - 鼠标事件
  */
-function clickHandler(app: App, id: string, event: MouseEvent) {
+function openDocHandler(docId: string, event: MouseEvent) {
+    // 阻止事件其他行为
     event.stopPropagation();
+
     // 打开新标签页
     openTab({
-        app: app,
+        app: getPluginInstance().app,
         doc: {
-            id,
+            id: docId,
         },
         // 条件属性：只有在按下辅助按键时才添加position属性
         // 如果多个键同时按下，后面属性覆盖前面
         ...(event.altKey && { position: "right" }), // 用alt，与思源默认行为一致
         // ...(e.shiftKey && { position: "bottom" }),
     });
+}
+
+/**
+ * 点击事件：打开子文档菜单
+ * @param notebookId - 笔记本id
+ * @param path - 文档路径
+ * @param event - 鼠标事件
+ */
+async function openChildDocsHandler(notebookId: string, path: string, event: MouseEvent) {
+    // 阻止事件其他行为
+    event.stopPropagation();
+    event.preventDefault();
+
+    // 获取信息
+    const i18n = getPluginInstance().i18n;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+    // 获取子文档
+    const childDocs = await getChildDocs(notebookId, path);
+
+    // 构建菜单
+    const menu = new Menu();
+    const itemStyle = `display: inline-block; max-width: ${CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH}; overflow: clip; text-overflow: ellipsis;`;
+    // 对每个子文档构建菜单项目
+    for (let i = 0; i < childDocs.length; i++) {
+        const childDoc = childDocs[i];
+        menu.addItem({
+            icon: "iconFile",
+            label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
+            click: (element, event) => {
+                openDocHandler(childDoc.id, event);
+            }
+        })
+    }
+    // 处理没有子文档的情况
+    if (childDocs.length === 0) {
+        menu.addItem({
+            icon: "iconInfo",
+            label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
+        })
+    }
+
+    // 设置菜单属性
+    const menuElement = menu.element as HTMLElement;
+    if (menuElement) {
+        menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
+    }
+
+    // 设置打开菜单的位置：菜单左上角=面包屑箭头的左下角
+    menu.open({
+        x: rect.left, y: rect.bottom,
+    })
+
 }

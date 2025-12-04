@@ -11,4 +11,6 @@ export class CONSTANTS {
     public static readonly STYLE_BREADCRUMBITEM_MAXWIDTH: string = "160px";
     public static readonly STYLE_SPACE_MAXWIDTH: string = "12px";
     public static readonly STYLE_ADJACENT_MINWIDTH: string = "160px";
+    public static readonly STYLE_CHILDDOCSMENU_MAXWIDTH: string = "180px";
+    public static readonly STYLE_CHILDDOCSMENUITEM_MAXWIDTH: string = "130px";
 }

@@ -1,6 +1,6 @@
 {
   "name": "plugin-doc-breadcrumb-light",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "description": "A light breadcrumb plugin for SiYuan",
   "repository": "https://gitee.com/liao-zh/plugin-doc-breadcrumb-light",
@@ -24,7 +24,7 @@
     "minimist": "^1.2.8",
     "rollup-plugin-livereload": "^2.0.5",
     "sass": "^1.94.2",
-    "siyuan": "1.1.5",
+    "siyuan": "1.1.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",

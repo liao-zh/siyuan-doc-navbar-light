@@ -96,36 +96,36 @@ export async function getAdjacentDocs(docId: string, notebookId: string, path: s
     return result
 }
 
+/**
+ * 子文档接口
+ * @property {string} name - 子文档名称
+ * @property {string} id - 子文档ID
+ */
+export interface IChildDoc {
+    name: string;
+    id: string;
+}
 
-// /**
-//  * 子文档获取
-//  * @param notebookId - 笔记本ID
-//  * @param path - 当前文档路径
-//  * @returns { prevName, prevId, nextName, nextId } - 子文档的名字和ID
-//  */
-// export async function getChildDocs(notebookId: string, path: string): Promise<IAdjacentDocs> {
-//     // 得到父级的路径
-//     const parts = path.split('/');
-//     parts.pop();
-//     const parent = (parts.length > 1) ? parts.join("/") + ".sy" : "/";
+/**
+ * 子文档获取
+ * @param notebookId - 笔记本ID
+ * @param path - 当前文档路径
+ * @returns {IChildDoc[]} - 子文档的名字和ID列表
+ */
+export async function getChildDocs(notebookId: string, path: string): Promise<IChildDoc[]> {
+    // 列出子文档：默认按照文档树顺序
+    const data = await request(
+        "/api/filetree/listDocsByPath",
+        {
+            notebook: notebookId,
+            path: path,
+        }
+    );
 
-//     // 列出同级文档：父级文档的子文档，默认按照文档树顺序
-//     const data = await request(
-//         "/api/filetree/listDocsByPath",
-//         {
-//             notebook: notebookId,
-//             path: parent,
-//         }
-//     )
-
-//     // 查找相邻文档
-//     const index = data.files.findIndex(item => item.id === docId);
-//     const prevName = index > 0 ? data.files[index - 1].name.replace(/\.sy$/, '') : null;
-//     const prevId = index > 0 ? data.files[index - 1].id : null;
-//     const nextName = index < data.files.length - 1 ? data.files[index + 1].name.replace(/\.sy$/, '') : null;
-//     const nextId = index < data.files.length - 1 ? data.files[index + 1].id : null;
-
-//     // 信息整合
-//     const result = { prevName, prevId, nextName, nextId };
-//     return result
-// }
+    // 提取子文档的名字和ID
+    const childDocs: IChildDoc[] = data.files.map(item => ({
+        name: item.name.replace(/\.sy$/, ''),
+        id: item.id,
+    }));
+    return childDocs
+}
