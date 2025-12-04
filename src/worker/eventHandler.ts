@@ -1,15 +1,18 @@
 // 触发事件处理器
 import {
     Plugin,
-    type IEventBusMap, type IProtyle,
+    type IEventBusMap,
     getAllEditor,
 } from "siyuan"
 import { TaskProcessor } from "@/worker/taskProcessor";
-import { ContentInjector } from "@/worker/contentInjector";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { getAllShowingDocId, removeInjected } from "@/utils/DOMUtils";
 import * as logger from "@/utils/logger";
 
+
+/**
+ * 事件处理器
+ */
 export class EventHandler {
     private plugin: Plugin;
     private taskProcessor: TaskProcessor;
@@ -19,11 +22,17 @@ export class EventHandler {
         "ws-main": this.handleWSMain.bind(this),
     };
 
+    /**
+     * 构造函数
+     */
     constructor() {
         this.plugin = getPluginInstance();
         this.taskProcessor = new TaskProcessor();
     }
 
+    /**
+     * 绑定事件处理器
+     */
     bindHandler() {
         // 绑定所有事件处理器
         for (let key in this.handlerList) {
@@ -36,6 +45,9 @@ export class EventHandler {
         this.taskProcessor.clearAllTasks();
     }
 
+    /**
+     * 解绑事件处理器
+     */
     unbindHandler() {
         // 解绑所有事件处理器
         for (let key in this.handlerList) {
@@ -45,14 +57,12 @@ export class EventHandler {
         this.taskProcessor.clearAllTasks();
     }
 
-    // async handleProtyle(protyle: IProtyle, replace: boolean = false) {
-    //     const contentInjector = new ContentInjector();
-    //     await contentInjector.apply(protyle);
-    // }
-
+    /**
+     * 处理所有显示中的文档
+     */
     async handleProtyleAllShowing() {
         // 在所有打开的protyle中，仅处理显示着的文档
-        // 两个都需要是因为，文档只能得到id，而editor能得到需要的protyle
+        // editor和id都需要，因为文档只能得到id，而editor能得到需要的protyle
         const allEditor = getAllEditor();
         const ids = getAllShowingDocId();
         if (ids != null && ids.length > 0) {
@@ -64,18 +74,30 @@ export class EventHandler {
         }
     }
 
+    /**
+     * 处理加载静态文档事件
+     * @param event - 加载静态文档事件
+     */
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
         logger.logDebug("触发事件：loaded-protyle-static", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
 
+    /**
+     * 处理切换文档事件
+     * @param event - 切换文档事件
+     */
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
         logger.logDebug("触发事件：switch-protyle", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
 
+    /**
+     * 处理主WebSocket事件
+     * @param event - 主WebSocket事件
+     */
     async handleWSMain(event: CustomEvent<IEventBusMap["ws-main"]>) {
         // logger.logDebug("ws-main事件：", event.detail.cmd);
         const cmdType = ["moveDoc", "rename", "removeDoc"];

@@ -1,23 +1,35 @@
 import { type IProtyle } from "siyuan";
 import { CONSTANTS } from "../constants";
 
-// 移除所有已经插入的内容
+/**
+ * 移除所有已经插入的内容
+ */
 export function removeInjected() {
     document.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => elem.remove());
 }
 
-// 移除指定protyle中的所有已经插入的内容
+/**
+ * 移除指定protyle中的所有已经插入的内容
+ * @param protyle - protyle对象
+ */
 export function removeInjectedFromProtyle(protyle: IProtyle) {
     protyle.element.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => elem.remove());
 }
 
-// 检查指定protyle是否已经插入了内容
+/**
+ * 检查指定protyle是否已经插入了内容
+ * @param protyle - protyle对象
+ * @returns {bool} - 是否已经插入了内容
+ */
 export function existInjectedInProtyle(protyle: IProtyle): boolean {
     return protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`) !== null;
 }
 
-// 获取所有显示中的文档id
-// 从文档层级导航插件复制而来
+/**
+ * 获取所有显示中的文档id
+ * @description 从文档层级导航插件复制而来
+ * @returns {string[]} - 所有显示中的文档id
+ */
 export function getAllShowingDocId(): string[] {
     const elemList = document.querySelectorAll("[data-type=wnd] .protyle.fn__flex-1:not(.fn__none) .protyle-background");
     const result = Array.from(elemList).map(elem => elem.getAttribute("data-node-id"));

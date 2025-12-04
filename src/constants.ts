@@ -3,7 +3,7 @@ export class CONSTANTS {
     public static readonly PLUGIN_NAME: string = "doc-breadcrumb-light";
     public static readonly PLUGIN_NAME_ZH: string = "文档面包屑";
 
-    // 自定义名字
+    // 自定义名称
     public static readonly CLASS_CONTAINER: string = "lzh-dbl-container";
     public static readonly LABEL_ADJACENT_PREV: string = "上一篇";
     public static readonly LABEL_ADJACENT_NEXT: string = "下一篇";

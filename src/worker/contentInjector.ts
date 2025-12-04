@@ -2,35 +2,26 @@
 
 import { App, type IProtyle, openTab, Plugin } from "siyuan";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs } from "@/utils/protyleUtils";
-import { existInjectedInProtyle, removeInjectedFromProtyle } from "@/utils/DOMUtils";
+import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS } from "@/constants";
 import * as logger from "@/utils/logger";
 
 
+/**
+ * 内容注入器
+ */
 export class ContentInjector {
     private plugin: Plugin
 
-    // 向指定protyle添加元素
-    // DOM：面包屑-空格-相邻文档，复用思源的元素类
-    // @param protyle 要添加元素的protyle
-    // @param replace 是否替换已存在元素
+    /**
+     * 向指定 protyle 添加元素
+     * DOM：面包屑-空格-相邻文档，复用思源的元素类
+     * @param protyle 要添加元素的 protyle
+     */
     async apply(protyle: IProtyle) {
         // 移除可能的已插入元素
         removeInjectedFromProtyle(protyle);
-
-        // 判断是否需要移除元素，以及是否跳过任务
-        // 取消原因：跳过会有漏洞
-        // if (existInjectedInProtyle(protyle)) {
-        //     // 存在已插入元素，且要替换，则移除已插入元素
-        //     if (replace) {
-        //         removeInjectedFromProtyle(protyle);
-        //     }
-        //     // 存在已插入元素，且不替换，则不执行任务
-        //     else {
-        //         return;
-        //     }
-        // }
 
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
@@ -67,8 +58,12 @@ export class ContentInjector {
         div.appendChild(elemAdjacent);
     }
 
-    // 构建文档面包屑元素
-    // DOM：div容器/{span条目/{图标-文本}，svg箭头}
+    /**
+     * 构建文档面包屑元素
+     * DOM：div容器/{span条目/{图标-文本}，svg箭头}
+     * @param protyleInfo - protyle 信息
+     * @returns {HTMLElement} - 面包屑元素
+     */
     createBreadcrumb(protyleInfo: IProtyleInfo): HTMLElement {
         // 路径分段
         const pathItems = protyleInfo.path.replace(/\.sy$/, '').split("/").slice(1);
@@ -101,9 +96,14 @@ export class ContentInjector {
         return div;
     }
 
-    // 构建文档面包屑HTML元素中的每个层级
-    // DOM：span容器/{图标-文本}
-    // @param type：面包屑项类型，notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档
+    /**
+     * 构建文档面包屑HTML元素中的每个层级
+     * DOM：span容器/{图标-文本}
+     * @param id - 面包屑项ID
+     * @param name - 面包屑项名称
+     * @param type：面包屑项类型，notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档
+     * @returns {HTMLElement} - 面包屑项元素
+     */
     createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): HTMLElement {
         const elem = createItem({
             app: this.plugin.app,
@@ -117,12 +117,19 @@ export class ContentInjector {
         return elem;
     }
 
-    // 构建面包屑层级之间的箭头
+    /**
+     * 构建面包屑层级之间的箭头
+     * @returns {SVGElement} - 面包屑箭头元素
+     */
     createBreadcrumbArrow(): SVGElement {
         return createSvg("protyle-breadcrumb__arrow", "#iconRight");
     }
 
-    // 构建相邻文档
+    /**
+     * 构建相邻文档元素
+     * @param protyleInfo - protyle信息
+     * @returns {HTMLElement} - 相邻文档元素
+     */
     async createAdjacent(protyleInfo: IProtyleInfo) {
         // 查找相邻文档
         const adjDocs = await getAdjacentDocs(protyleInfo.docId, protyleInfo.notebookId, protyleInfo.path);
@@ -166,16 +173,19 @@ export class ContentInjector {
     }
 }
 
-// 构建面包屑条目样式的元素
-// DOM：span容器/{图标-文本}
-// @param id 文档或笔记本ID
-// @param name 文档或笔记本名称
-// @param innerHTML 要显示的文本内容
-// @param iconName 图标名称
-// @param isClickable 是否可点击
-// @param app 思源应用实例
-// @param maxWidth? 最大宽度
-// @param naOpacity? 不可点击时的透明度
+/**
+ * 构建面包屑条目样式的元素
+ * DOM：span容器/{图标-文本}
+ * @param id - 文档或笔记本ID
+ * @param name - 文档或笔记本名称
+ * @param innerHTML - 要显示的文本内容
+ * @param iconName - 图标名称
+ * @param isClickable - 是否可点击
+ * @param app - 思源插件app
+ * @param maxWidth? - 最大宽度
+ * @param naOpacity? - 不可点击时的透明度
+ * @returns {HTMLElement} - 面包屑项元素
+ */
 function createItem({
         app,
         id,
@@ -225,7 +235,12 @@ function createItem({
     return elem;
 }
 
-// 构建SVG图标元素
+/**
+ * 构建SVG图标元素
+ * @param className - 图标类名
+ * @param iconName - 图标名称
+ * @returns {SVGElement} - 图标元素
+ */
 function createSvg(className: string, iconName: string): SVGElement {
     // 命名空间
     const nsSvg = "http://www.w3.org/2000/svg";
@@ -243,12 +258,14 @@ function createSvg(className: string, iconName: string): SVGElement {
     return svg;
 }
 
-// 点击事件处理函数
-// @param app 思源应用实例
-// @param id 文档id
-// @param e 鼠标事件
-function clickHandler(app: App, id: string, e: MouseEvent) {
-    e.stopPropagation();
+/**
+ * 点击事件处理函数
+ * @param app - 思源插件app
+ * @param id - 文档id
+ * @param event - 鼠标事件
+ */
+function clickHandler(app: App, id: string, event: MouseEvent) {
+    event.stopPropagation();
     // 打开新标签页
     openTab({
         app: app,
@@ -257,7 +274,7 @@ function clickHandler(app: App, id: string, e: MouseEvent) {
         },
         // 条件属性：只有在按下辅助按键时才添加position属性
         // 如果多个键同时按下，后面属性覆盖前面
-        ...(e.altKey && { position: "right" }), // 用alt，与思源默认行为一致
+        ...(event.altKey && { position: "right" }), // 用alt，与思源默认行为一致
         // ...(e.shiftKey && { position: "bottom" }),
     });
 }

@@ -2,17 +2,28 @@ import { type IProtyle } from "siyuan";
 import { ContentInjector } from "@/worker/contentInjector";
 import * as logger from "@/utils/logger";
 
+/**
+ * 任务接口，定义任务的结构
+ * @property {IProtyle} protyle - 关联的Protyle实例
+ * @property {boolean} replace - 是否替换现有内容
+ */
 interface ITask {
     protyle: IProtyle;
     replace: boolean;
 }
 
-// 任务处理调度器，使用统一队列管理所有任务处理
+/**
+ * 任务处理调度器，使用统一队列管理所有任务处理
+ */
 export class TaskProcessor {
     private taskQueue: ITask[] = []; // 统一任务队列
     private isProcessing = false; // 是否正在处理队列
     private processingIds = new Set<string>(); // 正在处理的任务ID映射
 
+    /**
+     * 添加任务到队列
+     * @param task - 要添加的任务
+     */
     addTask(task: ITask): void {
         const id = task.protyle.id;
 
@@ -33,7 +44,9 @@ export class TaskProcessor {
         }
     }
 
-    // 处理任务队列
+    /**
+     * 处理任务队列
+     */
     private async processQueue(): Promise<void> {
         this.isProcessing = true;
 
@@ -56,13 +69,18 @@ export class TaskProcessor {
         this.isProcessing = false;
     }
 
-    // 处理单个任务
+    /**
+     * 处理单个任务
+     * @param task - 要处理的任务
+     */
     private async processTask(task: ITask): Promise<void> {
         const contentInjector = new ContentInjector();
         await contentInjector.apply(task.protyle);
     }
 
-    //  清除所有任务
+    /**
+     * 清除所有任务
+     */
     clearAllTasks(): void {
         this.taskQueue = [];
         this.processingIds.clear();
