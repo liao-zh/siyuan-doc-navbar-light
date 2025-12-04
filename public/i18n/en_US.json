@@ -1,5 +1,7 @@
 {
-    "adjDocPrev": "Prev",
-    "adjDocNext": "Next",
+    "adjDocPrev": "Previous",
+    "adjDocNext": "Next Doc",
+    "createDoc": "New Doc",
+    "newDocTitle": "Untitled",
     "noChildDocs": "No child docs"
 }

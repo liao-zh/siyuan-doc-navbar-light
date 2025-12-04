@@ -5,13 +5,13 @@
 
 Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc-breadcrumb-light)
 
-[English](./README.md)
+[English Readme](./README.md)
+
+[更新历史](./CHANGELOG.md)
 
 ## 简介
 
-本插件为思源笔记添加了一个简单便捷的文档面包屑，保持显示在已有的块面包屑的上方，并可快速跳转上一篇/下一篇。
-
-[更新历史](./CHANGELOG.md)
+本插件为思源笔记添加了一个简单便捷的文档面包屑，保持显示在已有的块面包屑的上方。可跳转上一篇/下一篇，列出子文档，新建文档。
 
 ## 如何安装
 
@@ -27,25 +27,48 @@ Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc
 
 预览文档：光标悬停在文本处时，显示对应的全名。悬停在图标处时，显示文档预览。
 
-子文档：单击面包屑层级间的箭头，显示箭头左侧层级的子文档的列表，单击可跳转，也支持Alt/Ctrl+单击。
+子文档：单击面包屑层级间的箭头，显示箭头左侧层级的子文档的列表，单击可跳转，支持Alt/Ctrl+单击。
+
+新建文档：单击面包屑层级间的箭头，在与列出文档的同层级新建文档，支持Alt/Ctrl+单击打开新文档。
 
 ## 代码说明
 
-简单起见，本插件没有设置页面。可以修改`src/constants.ts`中的变量来进行一些设置。
+方法：
+- 设置：可以修改`src/constants.ts`中的变量来进行一些设置。
+- 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc）。
+- 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序。
+- 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档。
 
-监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc）。
-
-插入的HTML元素：参照了思源块面包屑的DOM结构，使用了相同的类`div.protyle-breadcrumb`，因此继承了样式。
-
-相邻文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序。
+代码结构：（未列出的部分与插件示例相同）
+```bash
+src/
+├── index.ts：插件入口
+├── constants.ts：设置
+├── worker/：用于执行主要功能
+│   ├── eventHandler.ts：监听事件
+│   ├── taskProcessor.ts：处理事件触发的任务
+│   ├── contentInjector.ts：对于每个任务，注入面包屑内容
+├── utils/：提供工具
+│   ├── api.ts：思源API的封装（来自示例）
+│   ├── pluginInstance.ts：插件实例的管理工具
+│   ├── DOMUtils.ts：处理DOM的工具
+│   ├── docUtils.ts：处理文档的工具
+│   ├── logger.ts：日志工具
+```
 
 ## 问题
 
 支持的平台：暂时不支持移动端。
 
-外观：使用集市中或自定义的外观时，如果改变了块面包屑样式，可能会对文档面包屑造成意想不到的改变。
+功能：
+- 新建文档：思源API新建文档用的是hpath，如果开始几个层级的名字相同，看上去会在顺序在前的路径下创建，而不一定在当前路径下。
 
-性能：如果相邻文档数量很多，查找时间可能较长。如果移动文档树，可能会触发大量moveDoc事件，导致插件大量的查找和更新操作。如果速度慢，执行大量操作之前，可以先把所有文档关闭。
+外观：
+- 使用集市中或自定义的外观时，如果改变了块面包屑样式，可能会对文档面包屑造成意想不到的改变。
+
+性能：
+- 如果移动文档树，可能会触发大量moveDoc事件，导致插件大量的查找和更新操作。如果速度慢，可以先把所有文档关闭。
+
 
 ## 参考
 

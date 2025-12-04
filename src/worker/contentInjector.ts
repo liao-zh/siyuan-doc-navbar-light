@@ -1,11 +1,11 @@
 // 制作和插入面包屑
 
-import { type IProtyle, openTab, Menu } from "siyuan";
-import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs } from "@/utils/protyleUtils";
-import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
-import { getPluginInstance } from "@/utils/pluginInstance";
+import { type IProtyle, Menu } from "siyuan";
 import { CONSTANTS } from "@/constants";
+import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
+import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
+import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs, openDocHandler, createDocHandler } from "@/utils/docUtils";
 
 
 /**
@@ -118,6 +118,8 @@ export class ContentInjector {
 
     /**
      * 构建面包屑层级之间的箭头
+     * @param notebookId - 笔记本id
+     * @param path - 文档路径
      * @returns {HTMLElement} - 面包屑箭头元素
      */
     createBreadcrumbArrow(notebookId: string, path: string): HTMLElement {
@@ -130,8 +132,87 @@ export class ContentInjector {
         elem.appendChild(svg);
 
         // 点击事件：打开子文档菜单
-        elem.addEventListener("click", openChildDocsHandler.bind(null, notebookId, path));
+        elem.addEventListener("click", this.listChildDocsHandler.bind(this, notebookId, path));
         return elem;
+    }
+
+    /**
+     * 点击事件：打开子文档菜单
+     * @param notebookId - 笔记本id
+     * @param path - 文档路径
+     * @param event - 鼠标事件
+     */
+    async listChildDocsHandler(notebookId: string, path: string, event: MouseEvent) {
+        // 阻止事件其他行为
+        event.stopPropagation();
+        event.preventDefault();
+
+        // log
+        logger.logDebug(`打开子文档菜单：notebookId=${notebookId}, path=${path}`);
+
+        // 获取信息
+        const i18n = getPluginInstance().i18n;
+
+        // 计算位置
+        // 当前元素（面包屑箭头）的位置信息
+        const currentTarget = event.currentTarget as HTMLElement;
+        const rect = currentTarget.getBoundingClientRect();
+        // 计算菜单最大宽度 = 相邻文档元素最右侧位置 - 面包屑箭头左侧位置
+        const nextTarget = currentTarget.parentElement.nextElementSibling; // 获取“相邻文档”元素
+        const rectNext = nextTarget.getBoundingClientRect();
+        const menuMaxWidth = rectNext.right - rect.left;
+
+        // 获取子文档
+        const childDocs = await getChildDocs(notebookId, path);
+
+        // 构建菜单
+        const menu = new Menu();
+        // 设置菜单项文本最大宽度
+        // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
+        // 不设置文本项最大宽度
+        const itemStyle = "";
+
+        // 新建文档项目
+        menu.addItem({
+            icon: "iconAdd",
+            label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
+            click: (element, event) => {
+                createDocHandler(notebookId, path, event);
+            }
+        })
+
+        // 对每个子文档构建菜单项目
+        for (let i = 0; i < childDocs.length; i++) {
+            const childDoc = childDocs[i];
+            menu.addItem({
+                icon: "iconFile",
+                label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
+                click: (element, event) => {
+                    openDocHandler(childDoc.id, event);
+                }
+            })
+        }
+        // 处理没有子文档的情况
+        // 取消原因：有了新建文档后，菜单至少有一项，不需要这个占位符了
+        // if (childDocs.length === 0) {
+        //     menu.addItem({
+        //         icon: "iconInfo",
+        //         label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
+        //     })
+        // }
+
+        // 设置菜单属性
+        const menuElement = menu.element as HTMLElement;
+        if (menuElement) {
+            // menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
+            menuElement.style.maxWidth = `${menuMaxWidth}px`;
+        }
+
+        // 设置打开菜单的位置：菜单左上角=面包屑箭头的左下角
+        menu.open({
+            x: rect.left, y: rect.bottom,
+        })
+
     }
 
     /**
@@ -263,94 +344,5 @@ function createSvg(className: string, iconName: string): SVGElement {
     return svg;
 }
 
-/**
- * 点击事件：打开文档
- * @param docId - 文档id
- * @param event - 鼠标事件
- */
-function openDocHandler(docId: string, event: MouseEvent) {
-    // 阻止事件其他行为
-    event.stopPropagation();
 
-    logger.logDebug(`点击打开文档：docId=${docId}`);
 
-    // 打开新标签页
-    openTab({
-        app: getPluginInstance().app,
-        doc: {
-            id: docId,
-        },
-        // 条件属性：只有在按下辅助按键时才添加position属性
-        // 如果多个键同时按下，后面属性覆盖前面
-        ...(event.altKey && { position: "right" }), // alt+单击时，在右侧打开页签
-        // ...(e.shiftKey && { position: "bottom" }),
-        keepCursor: event.ctrlKey? true : false, // ctrl+单击时，在后台打开页签
-    });
-}
-
-/**
- * 点击事件：打开子文档菜单
- * @param notebookId - 笔记本id
- * @param path - 文档路径
- * @param event - 鼠标事件
- */
-async function openChildDocsHandler(notebookId: string, path: string, event: MouseEvent) {
-    // 阻止事件其他行为
-    event.stopPropagation();
-    event.preventDefault();
-
-    logger.logDebug(`打开子文档菜单：notebookId=${notebookId}, path=${path}`);
-
-    // 获取信息
-    const i18n = getPluginInstance().i18n;
-
-    // 计算位置
-    // 当前元素（面包屑箭头）的位置信息
-    const currentTarget = event.currentTarget as HTMLElement;
-    const rect = currentTarget.getBoundingClientRect();
-    // 计算菜单最大宽度 = 相邻文档元素最右侧位置 - 面包屑箭头左侧位置
-    const nextTarget = currentTarget.parentElement.nextElementSibling; // 获取“相邻文档”元素
-    const rectNext = nextTarget.getBoundingClientRect();
-    const menuMaxWidth = rectNext.right - rect.left;
-
-    // 获取子文档
-    const childDocs = await getChildDocs(notebookId, path);
-
-    // 构建菜单
-    const menu = new Menu();
-    // 设置菜单项文本最大宽度
-    // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
-    // 不设置文本项最大宽度
-    const itemStyle = "";
-    // 对每个子文档构建菜单项目
-    for (let i = 0; i < childDocs.length; i++) {
-        const childDoc = childDocs[i];
-        menu.addItem({
-            icon: "iconFile",
-            label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
-            click: (element, event) => {
-                openDocHandler(childDoc.id, event);
-            }
-        })
-    }
-    // 处理没有子文档的情况
-    if (childDocs.length === 0) {
-        menu.addItem({
-            icon: "iconInfo",
-            label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
-        })
-    }
-
-    // 设置菜单属性
-    const menuElement = menu.element as HTMLElement;
-    if (menuElement) {
-        // menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
-        menuElement.style.maxWidth = `${menuMaxWidth}px`;
-    }
-
-    // 设置打开菜单的位置：菜单左上角=面包屑箭头的左下角
-    menu.open({
-        x: rect.left, y: rect.bottom,
-    })
-
-}

@@ -1,6 +1,7 @@
-import { type IProtyle } from "siyuan";
-import { request, getHPathByID, getNotebookConf } from "@/utils/api"
-
+import { type IProtyle, openTab } from "siyuan";
+import { getPluginInstance } from "@/utils/pluginInstance";
+import * as logger from "@/utils/logger";
+import { request, getHPathByID, getNotebookConf, createDocWithMd } from "@/utils/api"
 
 /**
  * protyle信息接口
@@ -128,4 +129,68 @@ export async function getChildDocs(notebookId: string, path: string): Promise<IC
         id: item.id,
     }));
     return childDocs
+}
+
+
+/**
+ * 点击事件：打开文档
+ * @param docId - 文档id
+ * @param event - 鼠标事件
+ */
+export function openDocHandler(docId: string, event: MouseEvent) {
+    // 阻止事件其他行为
+    event.stopPropagation();
+    event.preventDefault();
+
+    // log
+    logger.logDebug(`打开文档：docId=${docId}`);
+
+    // 打开新标签页
+    openTab({
+        app: getPluginInstance().app,
+        doc: {
+            id: docId,
+        },
+        // 条件属性：只有在按下辅助按键时才添加position属性
+        // 如果多个键同时按下，后面属性覆盖前面
+        ...(event.altKey && { position: "right" }), // alt+单击时，在右侧打开页签
+        // ...(e.shiftKey && { position: "bottom" }),
+        keepCursor: event.ctrlKey ? true : false, // ctrl+单击时，在后台打开页签
+    });
+}
+
+/**
+ * 点击事件：新建文档并打开
+ * @param notebookId - 笔记本id
+ * @param path - 文档路径
+ * @param event - 鼠标事件
+ * @issue 用思源API创建文档时，如果hpath开始几个层级相同，看上去会在顺序在前的路径下创建
+ */
+export async function createDocHandler(notebookId: string, path: string, event: MouseEvent) {
+    // 阻止事件其他行为
+    event.stopPropagation();
+    event.preventDefault();
+
+
+    // 新文档名称
+    const leaf = `/${getPluginInstance().i18n.newDocTitle}`;
+    // 从path计算hpath
+    let hpath: string;
+    if (path === "/") {
+        hpath = leaf;
+    } else {
+        const pathItems = path.split("/");
+        const docId = pathItems[pathItems.length - 1].replace(/\.sy$/, '');
+        hpath = await getHPathByID(docId);
+        hpath = hpath + leaf;
+    }
+
+    // log
+    logger.logDebug(`新建文档：notebookId=${notebookId}, hpath=${hpath}`);
+
+    // 新建文档
+    const docId = await createDocWithMd(notebookId, hpath, "");
+
+    // 打开文档
+    openDocHandler(docId, event);
 }
