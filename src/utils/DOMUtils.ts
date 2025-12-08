@@ -5,7 +5,7 @@ import { CONSTANTS } from "../constants";
  * 移除所有已经插入的内容
  */
 export function removeInjected() {
-    document.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => elem.remove());
+    document.querySelectorAll(`[${CONSTANTS.CONTAINER_ATTR}="${CONSTANTS.CONTAINER_VALUE}"]`).forEach(elem => elem.remove());
 }
 
 /**
@@ -13,7 +13,7 @@ export function removeInjected() {
  * @param protyle - protyle对象
  */
 export function removeInjectedFromProtyle(protyle: IProtyle) {
-    protyle.element.querySelectorAll(`.${CONSTANTS.CLASS_CONTAINER}`).forEach(elem => elem.remove());
+    protyle.element.querySelectorAll(`[${CONSTANTS.CONTAINER_ATTR}="${CONSTANTS.CONTAINER_VALUE}"]`).forEach(elem => elem.remove());
 }
 
 /**
@@ -22,7 +22,7 @@ export function removeInjectedFromProtyle(protyle: IProtyle) {
  * @returns {bool} - 是否已经插入了内容
  */
 export function existInjectedInProtyle(protyle: IProtyle): boolean {
-    return protyle.element.querySelector(`.${CONSTANTS.CLASS_CONTAINER}`) !== null;
+    return protyle.element.querySelector(`[${CONSTANTS.CONTAINER_ATTR}="${CONSTANTS.CONTAINER_VALUE}"]`) !== null;
 }
 
 /**
