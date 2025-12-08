@@ -37,7 +37,6 @@ export class ContentInjector {
         div.classList.add("protyle-breadcrumb");
         // 添加自定义属性作为标签
         div.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
-
         // 插入现有面包屑之前
         blockBreadcrumb.insertAdjacentElement("beforebegin", div);
 

@@ -4,23 +4,51 @@ import { type IProtyle, Menu } from "siyuan";
 import { CONSTANTS } from "@/constants";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
-import { removeInjectedFromProtyle } from "@/utils/DOMUtils";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs, openDocHandler, createDocHandler } from "@/utils/docUtils";
+import { init, h } from "snabbdom";
+import { styleModule, eventListenersModule } from "snabbdom";
+
 
 
 /**
  * 内容注入器
- */
-export class ContentInjector {
+*/
+export class ContentRenderer {
+    private patch = init([styleModule, eventListenersModule]);
+    private vnodes = new Map();
+
+    async update(protyle: IProtyle) {
+        // 判断是否存在块面包屑
+
+        // 判断是否已插入容器
+        // 处理容器和vnodes记录对不上的情况
+
+
+        // 获取protyle信息
+        const protyleInfo = await getProtyleInfo(protyle);
+
+        // 构建vnode
+        const newVNode = this.renderProtyle(protyleInfo);
+
+        // 第一次
+        // 构建容器
+        const newVNode = this.renderProtyle(protyleInfo);
+        const patchVNode = this.patch(container, newVNode);
+        this.vnodes.set(protyleInfo.id, {container: CSSContainerRule, vnode: patchVNode});
+
+        // 更新
+        const {container, vnode} = this.vnodes.get(protyleInfo.id);
+        const newVNode = this.renderProtyle(protyleInfo);
+        patchVNode = this.patch(vnode, newVNode);
+        this.vnodes.set(protyleInfo.id, {container: container, vnode: patchVNode});
+    }
+
     /**
      * 向指定 protyle 添加元素
      * DOM：面包屑-空格-相邻文档，复用思源的元素类
      * @param protyle 要添加元素的 protyle
      */
     async apply(protyle: IProtyle) {
-        // 移除可能的已插入元素
-        removeInjectedFromProtyle(protyle);
-
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
         if (!blockBreadcrumb) {
@@ -28,30 +56,30 @@ export class ContentInjector {
             return;
         }
 
+        // 构建整个面包屑容器
+        const div = document.createElement("div");
+        div.classList.add("protyle-breadcrumb");
+        // 添加自定义属性作为标签
+        div.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
+        // 插入现有面包屑之前
+        blockBreadcrumb.insertAdjacentElement("beforebegin", div);
+
         // 解析protyle
         const protyleInfo = await getProtyleInfo(protyle);
         logger.logDebug("插入元素：protyle信息", protyleInfo);
 
-        // 构建整个面包屑容器
-        const div = document.createElement("div");
-        div.classList.add("protyle-breadcrumb", CONSTANTS.CLASS_CONTAINER);
-        // 插入现有面包屑之前
-        blockBreadcrumb.insertAdjacentElement("beforebegin", div);
+        // // 构建面包屑元素
+        // const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
+        // div.appendChild(elemBreadcrumb);
 
-        // 构建面包屑元素
-        const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
-        div.appendChild(elemBreadcrumb);
+        // // 构建相邻文档元素
+        // const elemAdjacent = await this.createAdjacent(protyleInfo);
+        // div.appendChild(elemAdjacent);
 
-        // 添加空格间距
-        // 取消原因：相邻文档中用了影子元素后不需要额外间距了
-        // const space = document.createElement("span");
-        // space.classList.add("protyle-breadcrumb__space");
-        // space.style.maxWidth = CONSTANTS.STYLE_SPACE_MAXWIDTH;
-        // div.appendChild(space);
+    }
 
-        // 构建相邻文档元素
-        const elemAdjacent = await this.createAdjacent(protyleInfo);
-        div.appendChild(elemAdjacent);
+    renderProtyle(protyleInfo: IProtyleInfo) {
+
     }
 
     /**

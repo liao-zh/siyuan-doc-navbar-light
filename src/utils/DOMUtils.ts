@@ -17,9 +17,18 @@ export function removeInjectedFromProtyle(protyle: IProtyle) {
 }
 
 /**
+ * 查找protyle中插入的内容（只返回第一个）
+ * @param protyle - protyle对象
+ * @returns {null|HTMLElement} - 是否已经插入了内容
+ */
+export function selectInjectedInProtyle(protyle: IProtyle): null | HTMLElement {
+    return protyle.element.querySelector(`[${CONSTANTS.CONTAINER_ATTR}="${CONSTANTS.CONTAINER_VALUE}"]`);
+}
+
+/**
  * 检查指定protyle是否已经插入了内容
  * @param protyle - protyle对象
- * @returns {bool} - 是否已经插入了内容
+ * @returns {boolean} - 是否已经插入了内容
  */
 export function existInjectedInProtyle(protyle: IProtyle): boolean {
     return protyle.element.querySelector(`[${CONSTANTS.CONTAINER_ATTR}="${CONSTANTS.CONTAINER_VALUE}"]`) !== null;

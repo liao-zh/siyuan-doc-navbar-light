@@ -12,6 +12,7 @@ import { request, getHPathByID, getNotebookConf, createDocWithMd } from "@/utils
  * @property {string} hpath - 文档可读路径
  */
 export interface IProtyleInfo {
+    id: string;
     docId: string;
     notebookId: string;
     notebookName: string;
@@ -26,6 +27,7 @@ export interface IProtyleInfo {
  */
 export async function getProtyleInfo(protyle: IProtyle): Promise < IProtyleInfo > {
     // 基本信息
+    const id = protyle.id;
     const docId = protyle.block.rootID;
     const notebookId = protyle.notebookId;
     const path = protyle.path;
@@ -41,6 +43,7 @@ export async function getProtyleInfo(protyle: IProtyle): Promise < IProtyleInfo 
 
     // 信息整合
     const result: IProtyleInfo = {
+        id,
         docId,
         notebookId,
         notebookName,
