@@ -32,17 +32,19 @@ export class EventHandler {
 
     /**
      * 绑定事件处理器
-     */
-    bindHandler() {
+    */
+   bindHandler() {
+        // 清空DOM和任务处理器
+        removeInjected();
+        this.taskProcessor.clearAllTasks();
+
         // 绑定所有事件处理器
         for (let key in this.handlerList) {
             this.plugin.eventBus.on(key as keyof IEventBusMap, this.handlerList[key]);
         }
+
         // 首次加载时处理已经打开的文档
-        removeInjected();
         this.handleProtyleAllShowing();
-        // 清除任务处理器
-        this.taskProcessor.clearAllTasks();
     }
 
     /**
