@@ -1,5 +1,5 @@
 import { type IProtyle } from "siyuan";
-import { ContentInjector } from "@/worker/contentInjector";
+import { ContentRenderer } from "@/worker/contentRenderer";
 import * as logger from "@/utils/logger";
 
 /**
@@ -16,6 +16,7 @@ interface ITask {
  * 任务处理调度器，使用统一队列管理所有任务处理
  */
 export class TaskProcessor {
+    private contentRenderer = new ContentRenderer();
     private taskQueue: ITask[] = []; // 统一任务队列
     private isProcessing = false; // 是否正在处理队列
     private processingIds = new Set<string>(); // 正在处理的任务ID映射
@@ -74,8 +75,7 @@ export class TaskProcessor {
      * @param task - 要处理的任务
      */
     private async processTask(task: ITask): Promise<void> {
-        const contentInjector = new ContentInjector();
-        await contentInjector.apply(task.protyle);
+        await this.contentRenderer.update(task.protyle);
     }
 
     /**

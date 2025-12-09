@@ -4,9 +4,10 @@ import { type IProtyle, Menu } from "siyuan";
 import { CONSTANTS } from "@/constants";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
+import { selectInjectedInProtyle } from "@/utils/DOMUtils";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs, openDocHandler, createDocHandler } from "@/utils/docUtils";
-import { init, h } from "snabbdom";
-import { styleModule, eventListenersModule } from "snabbdom";
+import { init, h, VNode } from "snabbdom";
+import { classModule, propsModule, styleModule, eventListenersModule } from "snabbdom";
 
 
 
@@ -14,41 +15,15 @@ import { styleModule, eventListenersModule } from "snabbdom";
  * 内容注入器
 */
 export class ContentRenderer {
-    private patch = init([styleModule, eventListenersModule]);
-    private vnodes = new Map();
-
-    async update(protyle: IProtyle) {
-        // 判断是否存在块面包屑
-
-        // 判断是否已插入容器
-        // 处理容器和vnodes记录对不上的情况
-
-
-        // 获取protyle信息
-        const protyleInfo = await getProtyleInfo(protyle);
-
-        // 构建vnode
-        const newVNode = this.renderProtyle(protyleInfo);
-
-        // 第一次
-        // 构建容器
-        const newVNode = this.renderProtyle(protyleInfo);
-        const patchVNode = this.patch(container, newVNode);
-        this.vnodes.set(protyleInfo.id, {container: CSSContainerRule, vnode: patchVNode});
-
-        // 更新
-        const {container, vnode} = this.vnodes.get(protyleInfo.id);
-        const newVNode = this.renderProtyle(protyleInfo);
-        patchVNode = this.patch(vnode, newVNode);
-        this.vnodes.set(protyleInfo.id, {container: container, vnode: patchVNode});
-    }
+    private patch = init([classModule, propsModule, styleModule, eventListenersModule]);
+    private vnodesCache = new Map(); // {protyle.id: vnode}
 
     /**
-     * 向指定 protyle 添加元素
+     * 更新给定protyle的元素
      * DOM：面包屑-空格-相邻文档，复用思源的元素类
      * @param protyle 要添加元素的 protyle
      */
-    async apply(protyle: IProtyle) {
+    async update(protyle: IProtyle) {
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
         if (!blockBreadcrumb) {
@@ -56,30 +31,48 @@ export class ContentRenderer {
             return;
         }
 
-        // 构建整个面包屑容器
-        const div = document.createElement("div");
-        div.classList.add("protyle-breadcrumb");
-        // 添加自定义属性作为标签
-        div.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
-        // 插入现有面包屑之前
-        blockBreadcrumb.insertAdjacentElement("beforebegin", div);
+        // 选择插入的容器，如果没有就创建一个
+        let container = selectInjectedInProtyle(protyle);
+        if ( container === null ) {
+            container = document.createElement("div");
+            // 添加自定义属性作为标签
+            container.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
+            // 插入现有面包屑之前
+            blockBreadcrumb.insertAdjacentElement("beforebegin", container);
+        }
 
-        // 解析protyle
+        // 获取protyle信息
         const protyleInfo = await getProtyleInfo(protyle);
         logger.logDebug("插入元素：protyle信息", protyleInfo);
 
-        // // 构建面包屑元素
-        // const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
-        // div.appendChild(elemBreadcrumb);
+        // 构建vnode
+        const vnodeNew = this.renderProtyle(protyleInfo);
 
-        // // 构建相邻文档元素
-        // const elemAdjacent = await this.createAdjacent(protyleInfo);
-        // div.appendChild(elemAdjacent);
-
+        // 缓存vnode
+        const vnodeRec = this.vnodesCache.get(protyleInfo.id);
+        let vnodePatch: VNode;
+        if ( !vnodeRec ) {
+            vnodePatch = this.patch(container, vnodeNew);
+        } else {
+            vnodePatch = this.patch(vnodeRec, vnodeNew);
+        }
+        this.vnodesCache.set(protyleInfo.id, vnodePatch);
     }
 
-    renderProtyle(protyleInfo: IProtyleInfo) {
+    /**
+     * 从protyle信息构建面包屑元素的vnode
+     * @param protyleInfo - protyle 信息
+     * @returns {VNode} - 面包屑元素的vnode
+     */
+    renderProtyle(protyleInfo: IProtyleInfo): VNode {
+        // // 构建面包屑元素
+        // const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
+        // // 构建相邻文档元素
+        // const elemAdjacent = await this.createAdjacent(protyleInfo);
 
+        // 合并为一个vnode
+        const vnode = h("div.protyle-breadcrumb", {}, `test vnode: id=${protyleInfo.id}, path=${protyleInfo.hpath}`);
+        return vnode;
     }
 
     /**
@@ -220,14 +213,7 @@ export class ContentRenderer {
                 }
             })
         }
-        // 处理没有子文档的情况
-        // 取消原因：有了新建文档后，菜单至少有一项，不需要这个占位符了
-        // if (childDocs.length === 0) {
-        //     menu.addItem({
-        //         icon: "iconInfo",
-        //         label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
-        //     })
-        // }
+
 
         // 设置菜单属性
         const menuElement = menu.element as HTMLElement;
