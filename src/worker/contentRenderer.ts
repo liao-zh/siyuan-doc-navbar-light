@@ -235,7 +235,7 @@ export class ContentRenderer {
         menu.addItem({
             icon: "iconAdd",
             label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
-            click: (element, event) => {
+            click: (_, event) => {
                 createDocHandler(notebookId, path, event);
             }
         })
@@ -246,7 +246,7 @@ export class ContentRenderer {
             menu.addItem({
                 icon: "iconFile",
                 label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
-                click: (element, event) => {
+                click: (_, event) => {
                     openDocHandler(childDoc.id, event);
                 }
             })
