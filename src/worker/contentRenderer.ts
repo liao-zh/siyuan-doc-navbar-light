@@ -7,21 +7,22 @@ import * as logger from "@/utils/logger";
 import { selectInjectedInProtyle } from "@/utils/DOMUtils";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs, openDocHandler, createDocHandler } from "@/utils/docUtils";
 import { init, h, VNode } from "snabbdom";
-import { classModule, propsModule, styleModule, eventListenersModule } from "snabbdom";
-
+import { classModule, attributesModule, datasetModule, styleModule, eventListenersModule } from "snabbdom";
 
 
 /**
- * 内容注入器
+ * 内容渲染器
 */
 export class ContentRenderer {
-    private patch = init([classModule, propsModule, styleModule, eventListenersModule]);
-    private vnodesCache = new Map(); // {protyle.id: vnode}
+    // 初始化patch
+    private patch = init([classModule, attributesModule, datasetModule, styleModule, eventListenersModule]);
+    // 初始化vnode缓存：{protyle.id: vnode}
+    private vnodesCache = new Map();
 
     /**
-     * 更新给定protyle的元素
-     * DOM：面包屑-空格-相邻文档，复用思源的元素类
-     * @param protyle 要添加元素的 protyle
+     * 对给定protyle更新整个面包屑栏
+     * DOM：面包屑-空格-相邻文档
+     * @param protyle 要更新面包屑的protyle
      */
     async update(protyle: IProtyle) {
         // 判断是否存在块面包屑
@@ -31,13 +32,12 @@ export class ContentRenderer {
             return;
         }
 
-        // 选择插入的容器，如果没有就创建一个
+        // 选择插入的容器
         let container = selectInjectedInProtyle(protyle);
+        // 如果没有容器则创建一个，添加自定义属性作为标签，插入块面包屑之前
         if ( container === null ) {
             container = document.createElement("div");
-            // 添加自定义属性作为标签
             container.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
-            // 插入现有面包屑之前
             blockBreadcrumb.insertAdjacentElement("beforebegin", container);
         }
 
@@ -46,13 +46,15 @@ export class ContentRenderer {
         logger.logDebug("插入元素：protyle信息", protyleInfo);
 
         // 构建vnode
-        const vnodeNew = this.renderProtyle(protyleInfo);
+        const vnodeNew = await this.renderProtyle(protyleInfo);
 
         // 缓存vnode
         const vnodeRec = this.vnodesCache.get(protyleInfo.id);
         let vnodePatch: VNode;
+        // 如果缓存中不存在vnode，则直接patch
         if ( !vnodeRec ) {
             vnodePatch = this.patch(container, vnodeNew);
+        // 如果缓存中存在vnode，则patch更新
         } else {
             vnodePatch = this.patch(vnodeRec, vnodeNew);
         }
@@ -60,73 +62,69 @@ export class ContentRenderer {
     }
 
     /**
-     * 从protyle信息构建面包屑元素的vnode
-     * @param protyleInfo - protyle 信息
-     * @returns {VNode} - 面包屑元素的vnode
+     * 构建整个面包屑栏
+     * @param protyleInfo - protyle信息
+     * @returns {VNode} - 面包屑栏vnode
      */
-    renderProtyle(protyleInfo: IProtyleInfo): VNode {
-        // // 构建面包屑元素
-        // const elemBreadcrumb = this.createBreadcrumb(protyleInfo);
-        // // 构建相邻文档元素
-        // const elemAdjacent = await this.createAdjacent(protyleInfo);
-
-        // 合并为一个vnode
-        const vnode = h("div.protyle-breadcrumb", {}, `test vnode: id=${protyleInfo.id}, path=${protyleInfo.hpath}`);
-        return vnode;
+    async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
+        // 构建面包屑部分
+        const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
+        // 构建相邻文档
+        const adjVNode = await this.createAdjacent(protyleInfo);
+        // 构建面包屑栏
+        const fullVNode = h("div.protyle-breadcrumb", [breadcrumbVNode, adjVNode]);
+        return fullVNode;
     }
 
     /**
-     * 构建文档面包屑元素
+     * 构建面包屑
      * DOM：div容器/{span条目/{图标-文本}，svg箭头}
-     * @param protyleInfo - protyle 信息
-     * @returns {HTMLElement} - 面包屑元素
+     * @param protyleInfo - protyle信息
+     * @returns {VNode} - 面包屑vnode
      */
-    createBreadcrumb(protyleInfo: IProtyleInfo): HTMLElement {
+    createBreadcrumb(protyleInfo: IProtyleInfo): VNode {
+        // 构建子元素数组
         // 路径分段
         const pathItems = protyleInfo.path.replace(/\.sy$/, '').split("/").slice(1);
         const hpathItems = protyleInfo.hpath.split("/").slice(1);
-
-        // 创建容器
-        const div = document.createElement("div");
-        // 复用思源的类，protyle-breadcrumb__bar--nowrap在过长时不分行
-        div.classList.add("protyle-breadcrumb__bar", "protyle-breadcrumb__bar--nowrap");
-
+        const children: VNode[] = [];
         // 添加笔记本
         let pathI = "/";
-        div.append(
+        children.push(
             this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook"),
             this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
         );
-
         // 添加中间层级的文档
         for (let i = 0; i < pathItems.length - 1; i++) {
             pathI = "/" + pathItems.slice(0, i+1).join("/") + ".sy";
-            div.append(
+            children.push(
                 this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle"),
                 this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
             );
         }
-
         // 添加最后一层文档
         pathI = "/" + pathItems.join("/") + ".sy";
-        div.append(
+        children.push(
             this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last"),
             this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
         );
 
-        return div;
+        // 构建容器
+        const breadcrumbVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", children);
+
+        return breadcrumbVNode;
     }
 
     /**
-     * 构建文档面包屑HTML元素中的每个层级
+     * 构建面包屑的单个层级项
      * DOM：span容器/{图标-文本}
      * @param id - 面包屑项ID
      * @param name - 面包屑项名称
-     * @param type：面包屑项类型，notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档
-     * @returns {HTMLElement} - 面包屑项元素
+     * @param type：面包屑项类型（notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档）
+     * @returns {VNode} - 面包屑项vnode
      */
-    createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): HTMLElement {
-        const elem = createItem({
+    createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): VNode {
+        const itemVNode = createItem({
             id,
             name,
             innerHTML: name,
@@ -134,27 +132,30 @@ export class ContentRenderer {
             isClickable: type !== "notebook", // 除了笔记本，都可以点击
             maxWidth: type === "doc-middle" ? CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
         })
-        return elem;
+        return itemVNode;
     }
 
     /**
      * 构建面包屑层级之间的箭头
      * @param notebookId - 笔记本id
      * @param path - 文档路径
-     * @returns {HTMLElement} - 面包屑箭头元素
+     * @returns {VNode} - 面包屑箭头vnode
      */
-    createBreadcrumbArrow(notebookId: string, path: string): HTMLElement {
-        // 创建span容器包装svg
-        const elem = document.createElement("span");
-        elem.style.cursor = "pointer";
-
-        // 创建svg图标
-        const svg = createSvg("protyle-breadcrumb__arrow", "#iconRight");
-        elem.appendChild(svg);
-
-        // 点击事件：打开子文档菜单
-        elem.addEventListener("click", this.listChildDocsHandler.bind(this, notebookId, path));
-        return elem;
+    createBreadcrumbArrow(notebookId: string, path: string): VNode {
+        // 设置箭头属性
+        const arrowAttrs = {
+            style: {
+                cursor: "pointer",
+            },
+            on: {
+                click: this.listChildDocsHandler.bind(this, notebookId, path),
+            }
+        };
+        // 构建图标
+        const svgVNode = createSvg("protyle-breadcrumb__arrow", "#iconRight");
+        // 构建箭头
+        const arrowVNode = h("span", arrowAttrs, [ svgVNode ]);
+        return arrowVNode;
     }
 
     /**
@@ -214,7 +215,6 @@ export class ContentRenderer {
             })
         }
 
-
         // 设置菜单属性
         const menuElement = menu.element as HTMLElement;
         if (menuElement) {
@@ -230,24 +230,20 @@ export class ContentRenderer {
     }
 
     /**
-     * 构建相邻文档元素
+     * 构建相邻文档
      * @param protyleInfo - protyle信息
-     * @returns {HTMLElement} - 相邻文档元素
+     * @returns {VNode} - 相邻文档vnode
      */
-    async createAdjacent(protyleInfo: IProtyleInfo) {
+    async createAdjacent(protyleInfo: IProtyleInfo): Promise<VNode> {
         // 查找相邻文档
         const adjDocs = await getAdjacentDocs(protyleInfo.docId, protyleInfo.notebookId, protyleInfo.path);
-        // logger.logDebug("ContentInjector/createAdjacent: 相邻文档", adjDocs);
-        // 构建上一篇和下一篇
-        const elemPrev = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
-        const elemNext = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "next");
 
-        // 构建容器，保持和面包屑部分样式一致
-        const div = document.createElement("div");
-        div.classList.add("protyle-breadcrumb__bar", "protyle-breadcrumb__bar--nowrap");
-        div.style.minWidth = CONSTANTS.STYLE_ADJACENT_MINWIDTH;
+        // 构建上一篇和下一篇
+        const prevVNode = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
+        const nextVNode = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "next");
+
         // 构建假元素，应对有些外观样式（如Savor）会将第一个元素的图标改掉
-        const elemShaddow = createItem({
+        const shaddowVNode = createItem({
             id: null,
             name: null,
             innerHTML: "",
@@ -255,14 +251,29 @@ export class ContentRenderer {
             isClickable: false,
             naOpacity: "0",
         })
-        // 容器加入假元素、上一篇、下一篇
-        div.append(elemShaddow, elemPrev, elemNext);
-        return div;
+
+        // 构建相邻元素：[假元素，上一篇，下一篇]
+        const adjAttrs = {
+            style: {
+                minWidth: CONSTANTS.STYLE_ADJACENT_MINWIDTH,
+            }
+        }
+        const adjVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", adjAttrs,
+            [shaddowVNode, prevVNode, nextVNode]
+        )
+        return adjVNode;
     }
 
-    createAdjacentItem(id: string, name: string , type: "prev" | "next"): HTMLElement {
+    /**
+     * 构建相邻文档的一项
+     * @param id - 文档ID
+     * @param name - 文档名称
+     * @param type - 项类型（"prev"或"next"）
+     * @returns {VNode} - 相邻文档项vnode
+     */
+    createAdjacentItem(id: string, name: string , type: "prev" | "next"): VNode {
         const i18n = getPluginInstance().i18n;
-        const elem = createItem({
+        const itemVNode = createItem({
             id,
             name,
             innerHTML: type === "prev" ? i18n.adjDocPrev : i18n.adjDocNext,
@@ -270,12 +281,12 @@ export class ContentRenderer {
             isClickable: (id !== null), // 存在相邻文档时才可点击
             naOpacity: CONSTANTS.STYLE_DISABLED_OPACITY, // 不可点击时灰化
         })
-        return elem
+        return itemVNode
     }
 }
 
 /**
- * 构建面包屑条目样式的元素
+ * 构建面包屑条目样式
  * DOM：span容器/{图标-文本}
  * @param id - 文档或笔记本ID
  * @param name - 文档或笔记本名称
@@ -285,7 +296,7 @@ export class ContentRenderer {
  * @param app - 思源插件app
  * @param maxWidth? - 最大宽度
  * @param naOpacity? - 不可点击时的透明度
- * @returns {HTMLElement} - 面包屑项元素
+ * @returns {VNode} - 面包屑项样式的vnode
  */
 function createItem({
         id,
@@ -303,59 +314,65 @@ function createItem({
         isClickable: boolean;
         maxWidth?: string;
         naOpacity?: string;
-    }): HTMLElement {
+    }): VNode {
 
-    // 构建容器
-    const elem = document.createElement("span");
-    elem.classList.add("protyle-breadcrumb__item");
-    maxWidth && (elem.style.maxWidth = maxWidth);
+    // 设置item属性
+    const itemAttrs = {
+        style: {
+            ...(maxWidth && { "max-width": maxWidth }),
+            ...(!isClickable && naOpacity && { "opacity": naOpacity }),
+            cursor: isClickable ? "pointer" : "default",
+        },
+        dataset: {
+            ...(isClickable && { nodeId: id }),
+        },
+        on: {
+            ...(isClickable && { click: openDocHandler.bind(null, id) }),
+        },
+    };
 
     // 构建图标
-    const svg = createSvg("popover__block", iconName);
-    elem.appendChild(svg);
+    const svgVNode = createSvg("popover__block", iconName, isClickable? id:undefined);
 
-    // 构建文本元素
-    const text = document.createElement("span");
-    text.classList.add("protyle-breadcrumb__text");
-    name && (text.title = name); // name有值时才设置title
-    text.innerHTML = innerHTML;
-    elem.appendChild(text);
+    // 构建文本
+    const textAttrs = {
+        attrs: {
+            ...(name && { title: name })
+        },
+    };
+    const textVNode = h("span.protyle-breadcrumb__text", textAttrs, innerHTML);
 
-    // 如果可点击，则添加id和点击事件
-    if (isClickable) {
-        elem.dataset.nodeId = id;
-        svg.dataset.id = id;
-        elem.addEventListener("click", openDocHandler.bind(null, id));
-        elem.style.cursor = "pointer";
-    } else {
-        naOpacity && (elem.style.opacity = naOpacity);
-        elem.style.cursor = "default";
-    }
+    // 构建面包屑项
+    const itemVNode = h("span.protyle-breadcrumb__item", itemAttrs,
+    [
+        svgVNode,
+        textVNode
+    ]);
 
-    return elem;
+    return itemVNode;
 }
 
 /**
- * 构建SVG图标元素
+ * 构建SVG图标
  * @param className - 图标类名
  * @param iconName - 图标名称
- * @returns {SVGElement} - 图标元素
+ * @param dataId? - 图标数据ID
+ * @returns {VNode} - 图标vnode
  */
-function createSvg(className: string, iconName: string): SVGElement {
-    // 命名空间
-    const nsSvg = "http://www.w3.org/2000/svg";
-    const nsXlink = "http://www.w3.org/1999/xlink";
+function createSvg(className: string, iconName: string, dataId?: string): VNode {
+    const svgAttrs = {
+        dataset: {
+            ...(dataId && { id: dataId })
+        }
+    };
+    const xlinkAttrs = {
+        attrs: {
+            "xlink:href": iconName
+        }
+    };
 
-    // 构建svg
-    const svg = document.createElementNS(nsSvg, "svg");
-    svg.classList.add(className);
-
-    // 构建xlink
-    const xlink = document.createElementNS(nsSvg, "use");
-    xlink.setAttributeNS(nsXlink, "xlink:href", iconName);
-    svg.appendChild(xlink);
-
-    return svg;
+    const svgVNode = h(`svg.${className}`, svgAttrs, [ h("use", xlinkAttrs)]);
+    return svgVNode;
 }
 
 
