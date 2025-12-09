@@ -4,6 +4,7 @@ import {
     type IEventBusMap,
     getAllEditor,
 } from "siyuan"
+import { ContentRenderer } from "@/worker/contentRenderer";
 import { TaskProcessor } from "@/worker/taskProcessor";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { getAllShowingDocId, removeInjected } from "@/utils/DOMUtils";
@@ -15,6 +16,7 @@ import * as logger from "@/utils/logger";
  */
 export class EventHandler {
     private plugin: Plugin;
+    private contentRenderer: ContentRenderer;
     private taskProcessor: TaskProcessor;
     private handlerList: Record<string, (arg1: CustomEvent)=>void> = {
         "loaded-protyle-static": this.handleLoadedProtyleStatic.bind(this),
@@ -27,15 +29,17 @@ export class EventHandler {
      */
     constructor() {
         this.plugin = getPluginInstance();
-        this.taskProcessor = new TaskProcessor();
+        this.contentRenderer = new ContentRenderer();
+        this.taskProcessor = new TaskProcessor(this.contentRenderer);
     }
 
     /**
      * 绑定事件处理器
     */
    bindHandler() {
-        // 清空DOM和任务处理器
+        // 清理：DOM，vnode缓存，任务队列
         removeInjected();
+        this.contentRenderer.clearAllCache();
         this.taskProcessor.clearAllTasks();
 
         // 绑定所有事件处理器
@@ -55,7 +59,10 @@ export class EventHandler {
         for (let key in this.handlerList) {
             this.plugin.eventBus.off(key as keyof IEventBusMap, this.handlerList[key]);
         }
-        // 清除任务处理器
+
+        // 清理：DOM，vnode缓存，任务队列
+        removeInjected();
+        this.contentRenderer.clearAllCache();
         this.taskProcessor.clearAllTasks();
     }
 

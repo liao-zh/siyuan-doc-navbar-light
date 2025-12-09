@@ -16,10 +16,18 @@ interface ITask {
  * 任务处理调度器，使用统一队列管理所有任务处理
  */
 export class TaskProcessor {
-    private contentRenderer = new ContentRenderer();
+    private contentRenderer: ContentRenderer; // 内容渲染器
     private taskQueue: ITask[] = []; // 统一任务队列
     private isProcessing = false; // 是否正在处理队列
     private processingIds = new Set<string>(); // 正在处理的任务ID映射
+
+    /**
+     * 构造函数，初始化任务处理调度器
+     * @param contentRenderer - 内容渲染器实例
+     */
+    constructor(contentRenderer: ContentRenderer) {
+        this.contentRenderer = contentRenderer;
+    }
 
     /**
      * 添加任务到队列

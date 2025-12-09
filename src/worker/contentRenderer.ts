@@ -1,6 +1,6 @@
 // 制作和插入面包屑
 
-import { type IProtyle, Menu } from "siyuan";
+import { type IProtyle, Menu, getAllEditor } from "siyuan";
 import { CONSTANTS } from "@/constants";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
@@ -20,6 +20,31 @@ export class ContentRenderer {
     private vnodesCache = new Map();
 
     /**
+     * 清空所有vnode缓存
+     */
+    clearAllCache(): void {
+        this.vnodesCache.clear();
+    }
+
+    /**
+     * 清除不活跃的vnode缓存
+     */
+    clearInactiveCache(): void {
+        // 获取所有protyle的id
+        const allEditor = getAllEditor();
+        const activeIds = new Set(allEditor.map(editor => editor.protyle.id));
+
+        // 遍历缓存，删除不活跃的vnode
+        const idsToDelete: string[] = [];
+        this.vnodesCache.forEach((_, id) => {
+            if ( !activeIds.has(id) ) {
+                idsToDelete.push(id);
+            }
+        });
+        idsToDelete.forEach(id => this.vnodesCache.delete(id));
+    }
+
+    /**
      * 对给定protyle更新整个面包屑栏
      * DOM：面包屑-空格-相邻文档
      * @param protyle 要更新面包屑的protyle
@@ -34,31 +59,34 @@ export class ContentRenderer {
 
         // 选择插入的容器
         let container = selectInjectedInProtyle(protyle);
-        // 如果没有容器则创建一个，添加自定义属性作为标签，插入块面包屑之前
+        // 如果没有容器则创建一个，插入块面包屑之前
         if ( container === null ) {
             container = document.createElement("div");
-            container.setAttribute(CONSTANTS.CONTAINER_ATTR, CONSTANTS.CONTAINER_VALUE);
             blockBreadcrumb.insertAdjacentElement("beforebegin", container);
         }
 
         // 获取protyle信息
         const protyleInfo = await getProtyleInfo(protyle);
         logger.logDebug("插入元素：protyle信息", protyleInfo);
+        logger.logDebug("插入元素：vnode缓存", Array.from(this.vnodesCache.keys()));
 
         // 构建vnode
         const vnodeNew = await this.renderProtyle(protyleInfo);
 
-        // 缓存vnode
+        // patch更新DOM
         const vnodeRec = this.vnodesCache.get(protyleInfo.id);
         let vnodePatch: VNode;
         // 如果缓存中不存在vnode，则直接patch
         if ( !vnodeRec ) {
             vnodePatch = this.patch(container, vnodeNew);
-        // 如果缓存中存在vnode，则patch更新
+            // 如果缓存中存在vnode，则patch更新
         } else {
             vnodePatch = this.patch(vnodeRec, vnodeNew);
         }
         this.vnodesCache.set(protyleInfo.id, vnodePatch);
+
+        // 清理vnode缓存
+        this.clearInactiveCache();
     }
 
     /**
@@ -69,10 +97,19 @@ export class ContentRenderer {
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
         // 构建面包屑部分
         const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
+
         // 构建相邻文档
         const adjVNode = await this.createAdjacent(protyleInfo);
+
         // 构建面包屑栏
-        const fullVNode = h("div.protyle-breadcrumb", [breadcrumbVNode, adjVNode]);
+        const fullAttrs = {
+            attrs: {
+                [CONSTANTS.CONTAINER_ATTR]: `${CONSTANTS.CONTAINER_VALUE}`,
+            }
+        };
+        const fullVNode = h("div.protyle-breadcrumb", fullAttrs,
+            [breadcrumbVNode, adjVNode]
+        );
         return fullVNode;
     }
 
