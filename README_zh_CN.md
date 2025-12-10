@@ -31,10 +31,11 @@ Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc
 
 新建文档：单击面包屑层级间的箭头，在与列出文档的同层级新建文档，支持Alt/Ctrl+单击打开新文档。
 
+设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否能够新建文档。
+
 ## 代码说明
 
 方法：
-- 设置：可以修改`src/constants.ts`中的变量来进行一些设置。
 - 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc）。
 - 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序。
 - 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档。
@@ -45,6 +46,7 @@ src/
 ├── index.ts：插件入口
 ├── constants.ts：设置
 ├── worker/：用于执行主要功能
+│   ├── settingManager.ts：设置管理器
 │   ├── eventHandler.ts：监听事件
 │   ├── taskProcessor.ts：处理事件触发的任务
 │   ├── contentRenderer.ts：对于每个任务，渲染面包屑内容
@@ -61,7 +63,7 @@ src/
 支持的平台：暂时不支持移动端。
 
 功能：
-- 新建文档：思源API新建文档用的是hpath，如果开始几个层级的名字相同，看上去会在顺序在前的路径下创建，而不一定在当前路径下。
+- 新建文档：思源API新建文档用的是hpath，如果开始几个层级的名字相同，看上去会在顺序在前的路径下创建，而不一定在当前路径下。在编辑锁定状态下也能新建。新建的文档删除时思源右上角会报警告。
 
 外观：
 - 使用集市中或自定义的外观时，如果改变了块面包屑样式，可能会对文档面包屑造成意想不到的改变。

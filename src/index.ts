@@ -1,8 +1,8 @@
 import { Plugin } from "siyuan";
 import "@/index.scss";
 
+import { SettingManager } from "./worker/settingManager";
 import { EventHandler } from "./worker/eventHandler";
-import { SettingManager } from "./utils/settingManager";
 import { CONSTANTS as C } from "./constants";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { removeInjected } from "./utils/DOMUtils";
