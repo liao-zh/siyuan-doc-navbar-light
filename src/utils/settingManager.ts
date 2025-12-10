@@ -29,6 +29,10 @@ export class SettingManager {
             plugin: this.plugin,
             name: C.SETTING_STORAGE,
             height: C.SETTING_STORAGE_HEIGHT,
+            callback: (data) => {
+                this.plugin.eventHandler.handleProtyleAllShowing();
+                logger.logDebug("设置完成", data);
+            }
         });
 
         // 添加设置项

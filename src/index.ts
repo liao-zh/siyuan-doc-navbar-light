@@ -11,7 +11,7 @@ import * as test from "./test/test";
 
 export default class PluginDocBreadcrumbLight extends Plugin {
     settingManager: SettingManager;
-    private eventHandler: EventHandler;
+    eventHandler: EventHandler;
 
     async onload() {
         logger.logInfo("加载插件");
@@ -26,6 +26,7 @@ export default class PluginDocBreadcrumbLight extends Plugin {
 
         // 事件处理器初始化
         this.eventHandler = new EventHandler();
+
     }
 
     onLayoutReady() {
@@ -35,7 +36,7 @@ export default class PluginDocBreadcrumbLight extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        // test.testSetting2();
+        // test.testEventbus();
     }
 
     async onunload() {
