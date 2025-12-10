@@ -1,7 +1,7 @@
 // 制作和插入面包屑
 
 import { type IProtyle, Menu, getAllEditor } from "siyuan";
-import { CONSTANTS } from "@/constants";
+import { CONSTANTS as C } from "@/constants";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
 import { selectInjectedInProtyle } from "@/utils/DOMUtils";
@@ -112,7 +112,7 @@ export class ContentRenderer {
         // 构建面包屑栏
         const fullAttrs = {
             attrs: {
-                [CONSTANTS.CONTAINER_ATTR]: `${CONSTANTS.CONTAINER_VALUE}`,
+                [C.CONTAINER_ATTR]: `${C.CONTAINER_VALUE}`,
             }
         };
         const fullVNode = h("div.protyle-breadcrumb", fullAttrs, fullChildren);
@@ -184,7 +184,7 @@ export class ContentRenderer {
             innerHTML: name,
             iconName: type === "notebook" ? "#iconFolder" : "#iconFile", // 笔记本用文件夹图标，文档用文件图标
             isClickable: type !== "notebook", // 除了笔记本，都可以点击
-            maxWidth: type === "doc-middle" ? CONSTANTS.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
+            maxWidth: type === "doc-middle" ? C.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
         })
         return itemVNode;
     }
@@ -242,7 +242,7 @@ export class ContentRenderer {
         // 构建菜单
         const menu = new Menu();
         // 设置菜单项文本最大宽度
-        // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(CONSTANTS.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
+        // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(C.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
         // 不设置文本项最大宽度
         const itemStyle = "";
 
@@ -274,7 +274,7 @@ export class ContentRenderer {
         if (childDocs.length === 0) {
             menu.addItem({
                 icon: "iconInfo",
-                label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
+                label: `<span title="${i18n.noChildDocs}" style="opacity: ${C.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
             })
         }
 
@@ -317,7 +317,7 @@ export class ContentRenderer {
         // 构建相邻元素：[假元素，上一篇，下一篇]
         const adjAttrs = {
             style: {
-                minWidth: CONSTANTS.STYLE_ADJACENT_MINWIDTH,
+                minWidth: C.STYLE_ADJACENT_MINWIDTH,
             }
         }
         const adjVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", adjAttrs,
@@ -341,7 +341,7 @@ export class ContentRenderer {
             innerHTML: type === "prev" ? i18n.adjDocPrev : i18n.adjDocNext,
             iconName: type === "prev" ? "#iconBack" : "#iconForward",
             isClickable: (id !== null), // 存在相邻文档时才可点击
-            naOpacity: CONSTANTS.STYLE_DISABLED_OPACITY, // 不可点击时灰化
+            naOpacity: C.STYLE_DISABLED_OPACITY, // 不可点击时灰化
         })
         return itemVNode
     }

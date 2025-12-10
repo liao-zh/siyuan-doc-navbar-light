@@ -4,7 +4,10 @@ export class CONSTANTS {
     public static readonly PLUGIN_NAME_ZH: string = "文档面包屑";
 
     // 插件设置
-    public static readonly STORAGE_NAME: string = "menu_config";
+    public static readonly SETTING_STORAGE: string = "menu_config";
+    public static readonly SETTING_STORAGE_HEIGHT: string = "400px";
+    public static readonly SETTING_KEY_PINADJACENTRIGHT: string = "pinAdjacentRight";
+    public static readonly SETTING_KEY_ENABLENEWDOC: string = "enableNewDoc";
 
     // 自定义名称
     public static readonly CONTAINER_ATTR: string = "data-plugin-tag";

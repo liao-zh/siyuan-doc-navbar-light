@@ -1,9 +1,12 @@
 // 管理设置
 import { SettingUtils } from "@/libs/setting-utils";
 import { getPluginInstance } from "@/utils/pluginInstance";
-import { CONSTANTS } from "@/constants";
+import { CONSTANTS as C } from "@/constants";
 import * as logger from "@/utils/logger";
 
+/**
+ * 管理插件设置
+ */
 export class SettingManager {
     private settingUtils: SettingUtils;
     private plugin = getPluginInstance();
@@ -15,41 +18,55 @@ export class SettingManager {
         this.settingUtils.load();
     }
 
+    /**
+     * 初始化设置工具
+     */
     initSettingUtils() {
         const i18nSetting = this.plugin.i18n.setting;
+
+        // 设置工具初始化
         this.settingUtils = new SettingUtils({
-            plugin: this.plugin, name: CONSTANTS.STORAGE_NAME
+            plugin: this.plugin,
+            name: C.SETTING_STORAGE,
+            height: C.SETTING_STORAGE_HEIGHT,
         });
+
+        // 添加设置项
         this.settingUtils.addItem({
-            key: "pinAdjacentRight",
+            key: C.SETTING_KEY_PINADJACENTRIGHT,
             value: true,
             type: "checkbox",
-            title: i18nSetting.pinAdjacentRight.title,
-            description: i18nSetting.pinAdjacentRight.description,
+            title: i18nSetting[C.SETTING_KEY_PINADJACENTRIGHT]["title"],
+            description: i18nSetting[C.SETTING_KEY_PINADJACENTRIGHT]["description"],
             action: {
                 callback: () => {
-                    let value = !this.settingUtils.get("pinAdjacentRight");
-                    this.settingUtils.setAndSave("pinAdjacentRight", value);
-                    logger.logDebug("设置：pinAdjacentRight", value);
+                    let value = !this.settingUtils.get(C.SETTING_KEY_PINADJACENTRIGHT);
+                    this.settingUtils.setAndSave(C.SETTING_KEY_PINADJACENTRIGHT, value);
+                    logger.logDebug(`设置：${C.SETTING_KEY_PINADJACENTRIGHT}`, value);
                 }
             }
         });
         this.settingUtils.addItem({
-            key: "enableNewDoc",
+            key: C.SETTING_KEY_ENABLENEWDOC,
             value: true,
             type: "checkbox",
-            title: i18nSetting.enableNewDoc.title,
-            description: i18nSetting.enableNewDoc.description,
+            title: i18nSetting[C.SETTING_KEY_ENABLENEWDOC]["title"],
+            description: i18nSetting[C.SETTING_KEY_ENABLENEWDOC]["description"],
             action: {
                 callback: () => {
-                    let value = !this.settingUtils.get("enableNewDoc");
-                    this.settingUtils.setAndSave("enableNewDoc", value);
-                    logger.logDebug("设置：enableNewDoc", value);
+                    let value = !this.settingUtils.get(C.SETTING_KEY_ENABLENEWDOC);
+                    this.settingUtils.setAndSave(C.SETTING_KEY_ENABLENEWDOC, value);
+                    logger.logDebug(`设置：${C.SETTING_KEY_ENABLENEWDOC}`, value);
                 }
             }
         });
     }
 
+    /**
+     * 获取设置值
+     * @param key 设置键
+     * @returns 设置值
+     */
     get(key: string) {
         return this.settingUtils.get(key);
     }

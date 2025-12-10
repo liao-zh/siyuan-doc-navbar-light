@@ -3,7 +3,7 @@ import "@/index.scss";
 
 import { EventHandler } from "./worker/eventHandler";
 import { SettingManager } from "./utils/settingManager";
-import { CONSTANTS } from "./constants";
+import { CONSTANTS as C } from "./constants";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
@@ -16,7 +16,7 @@ export default class DocBreadcrumbLight extends Plugin {
     async onload() {
         logger.logInfo("加载插件");
 
-        this.data[CONSTANTS.STORAGE_NAME] = { Check: true };
+        this.data[C.SETTING_STORAGE] = { Check: true };
 
         // 设置插件实例
         setPluginInstance(this);
