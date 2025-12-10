@@ -16,6 +16,7 @@ export class SettingManager {
     }
 
     initSettingUtils() {
+        const i18nSetting = this.plugin.i18n.setting;
         this.settingUtils = new SettingUtils({
             plugin: this.plugin, name: CONSTANTS.STORAGE_NAME
         });
@@ -23,8 +24,8 @@ export class SettingManager {
             key: "pinAdjacentRight",
             value: true,
             type: "checkbox",
-            title: "将相邻文档按钮固定在右侧",
-            description: "选项开启后，相邻文档按钮将固定在右侧，关闭后则按钮随面包屑浮动。",
+            title: i18nSetting.pinAdjacentRight.title,
+            description: i18nSetting.pinAdjacentRight.description,
             action: {
                 callback: () => {
                     let value = !this.settingUtils.get("pinAdjacentRight");
@@ -37,8 +38,8 @@ export class SettingManager {
             key: "enableNewDoc",
             value: true,
             type: "checkbox",
-            title: "启用新建文档功能",
-            description: "选项开启后，列出子文档时会显示新建文档按钮，关闭后则不显示。关闭可以防止误触新建文档。",
+            title: i18nSetting.enableNewDoc.title,
+            description: i18nSetting.enableNewDoc.description,
             action: {
                 callback: () => {
                     let value = !this.settingUtils.get("enableNewDoc");

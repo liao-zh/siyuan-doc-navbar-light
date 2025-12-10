@@ -1,0 +1,13 @@
+---
+adjDocPrev: "Previous"
+adjDocNext: "Next Doc"
+createDoc: "New Doc"
+newDocTitle: "Untitled"
+noChildDocs: "No child docs"
+setting:
+  pinAdjacentRight:
+    title: "Pin adjacent document buttons to the right"
+    description: "When enabled, adjacent document buttons will be pinned to the right. When disabled, the buttons will float with the breadcrumb."
+  enableNewDoc:
+    title: "Enable new document creation"
+    description: "When enabled, a new document creation button will be shown when listing child documents. When disabled, the button will not be shown."
