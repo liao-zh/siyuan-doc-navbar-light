@@ -1,24 +1,25 @@
-import { Plugin } from "siyuan";
-import { logError } from "./logger"
+// import { Plugin } from "siyuan";
+import PluginDocBreadcrumbLight from "@/index";
+import { logError } from "@/utils/logger"
 
 /**
  * 插件实例变量
  */
-let pluginInstance: Plugin | null = null
+let pluginInstance: PluginDocBreadcrumbLight | null = null
 
 /**
  * 设置插件实例
  * @param instance - 插件实例
  */
-export function setPluginInstance(instance: Plugin) {
+export function setPluginInstance(instance: PluginDocBreadcrumbLight) {
     pluginInstance = instance
 }
 
 /**
  * 获取插件实例
- * @returns {Plugin} - 插件实例
+ * @returns {PluginDocBreadcrumbLight} - 插件实例
  */
-export function getPluginInstance(): Plugin {
+export function getPluginInstance(): PluginDocBreadcrumbLight {
     if (!pluginInstance) {
         logError("getPluginInstance错误：插件实例未绑定")
     }

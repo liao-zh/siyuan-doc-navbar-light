@@ -9,8 +9,8 @@ import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
 import * as test from "./test/test";
 
-export default class DocBreadcrumbLight extends Plugin {
-    private settingManager: SettingManager;
+export default class PluginDocBreadcrumbLight extends Plugin {
+    settingManager: SettingManager;
     private eventHandler: EventHandler;
 
     async onload() {
