@@ -3,6 +3,9 @@ export class CONSTANTS {
     public static readonly PLUGIN_NAME: string = "doc-breadcrumb-light";
     public static readonly PLUGIN_NAME_ZH: string = "文档面包屑";
 
+    // 插件设置
+    public static readonly STORAGE_NAME: string = "menu_config";
+
     // 自定义名称
     public static readonly CONTAINER_ATTR: string = "data-plugin-tag";
     public static readonly CONTAINER_VALUE: string = "lzh-doc-breadcrumb-light";

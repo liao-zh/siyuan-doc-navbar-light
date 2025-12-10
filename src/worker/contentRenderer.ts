@@ -14,6 +14,7 @@ import { classModule, attributesModule, datasetModule, styleModule, eventListene
  * 内容渲染器
 */
 export class ContentRenderer {
+    private plugin = getPluginInstance();
     // 初始化patch
     private patch = init([classModule, attributesModule, datasetModule, styleModule, eventListenersModule]);
     // 初始化vnode缓存：{protyle.id: vnode}
@@ -97,8 +98,16 @@ export class ContentRenderer {
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
         // 构建面包屑栏的元素：面包屑部分，空格，相邻文档
         const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
-        // const spaceVNode = this.createSpace();
+        const spaceVNode = this.createSpace();
         const adjVNode = await this.createAdjacent(protyleInfo);
+
+        // 排列面包屑栏的元素：根据是否要把相邻文档固定在右侧分别排列
+        let fullChildren: VNode[];
+        if ( this.plugin.settingManager.get("pinAdjacentRight") ) {
+            fullChildren = [breadcrumbVNode, spaceVNode, adjVNode];
+        } else {
+            fullChildren = [breadcrumbVNode, adjVNode];
+        }
 
         // 构建面包屑栏
         const fullAttrs = {
@@ -106,9 +115,7 @@ export class ContentRenderer {
                 [CONSTANTS.CONTAINER_ATTR]: `${CONSTANTS.CONTAINER_VALUE}`,
             }
         };
-        const fullVNode = h("div.protyle-breadcrumb", fullAttrs,
-            [breadcrumbVNode, adjVNode]
-        );
+        const fullVNode = h("div.protyle-breadcrumb", fullAttrs, fullChildren);
         return fullVNode;
     }
 
@@ -241,13 +248,15 @@ export class ContentRenderer {
 
         // 新建文档项目
         // 需要考虑更周全：锁定状态不能新建；删除新建的文档时，思源会在右上角提示warning，暂时不知道是什么原因
-        menu.addItem({
-            icon: "iconAdd",
-            label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
-            click: (_, event) => {
-                createDocHandler(notebookId, path, event);
-            }
-        })
+        if ( this.plugin.settingManager.get("enableNewDoc") ) {
+            menu.addItem({
+                icon: "iconAdd",
+                label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
+                click: (_, event) => {
+                    createDocHandler(notebookId, path, event);
+                }
+            })
+        }
 
         // 对每个子文档构建菜单项目
         for (let i = 0; i < childDocs.length; i++) {

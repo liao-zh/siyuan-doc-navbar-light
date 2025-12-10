@@ -168,3 +168,26 @@ export function testListDocs2() {
         });
     });
 }
+
+// 设置
+export function testSetting() {
+    const plugin = getPluginInstance();
+
+    // 插件设置
+    plugin.eventBus.on("switch-protyle", (event) => {
+        logLog("settingUtils", plugin.settingUtils);
+        logLog("settingUtils-get", plugin.settingUtils.get("Check"));
+    });
+}
+
+// 设置
+export function testSetting2() {
+    const plugin = getPluginInstance();
+
+    // 插件设置
+    plugin.eventBus.on("switch-protyle", (event) => {
+        logLog("settingManager", plugin.settingManager);
+        logLog("settingManager: pinAdjacentRight", plugin.settingManager.get("pinAdjacentRight"));
+        logLog("settingManager: enableNewDoc", plugin.settingManager.get("enableNewDoc"));
+    });
+}

@@ -1,21 +1,28 @@
 import { Plugin } from "siyuan";
 import "@/index.scss";
 
-import { setPluginInstance } from "./utils/pluginInstance";
 import { EventHandler } from "./worker/eventHandler";
+import { SettingManager } from "./utils/settingManager";
+import { CONSTANTS } from "./constants";
+import { setPluginInstance } from "./utils/pluginInstance";
 import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
 import * as test from "./test/test";
 
 export default class DocBreadcrumbLight extends Plugin {
-
+    private settingManager: SettingManager;
     private eventHandler: EventHandler;
 
     async onload() {
         logger.logInfo("加载插件");
 
+        this.data[CONSTANTS.STORAGE_NAME] = { Check: true };
+
         // 设置插件实例
         setPluginInstance(this);
+
+        // 设置插件设置
+        this.settingManager = new SettingManager();
 
         // 事件处理器初始化
         this.eventHandler = new EventHandler();
@@ -28,7 +35,7 @@ export default class DocBreadcrumbLight extends Plugin {
         this.eventHandler.bindHandler();
 
         // 测试
-        // test.testProtyle();
+        // test.testSetting2();
     }
 
     async onunload() {
