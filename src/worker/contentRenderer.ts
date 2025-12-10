@@ -125,25 +125,27 @@ export class ContentRenderer {
         const pathItems = protyleInfo.path.replace(/\.sy$/, '').split("/").slice(1);
         const hpathItems = protyleInfo.hpath.split("/").slice(1);
         const children: VNode[] = [];
+        // 计算菜单最大宽度
+        const menuRightMax = protyleInfo.rect.right;
         // 添加笔记本
         let pathI = "/";
         children.push(
             this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook"),
-            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
+            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
         );
         // 添加中间层级的文档
         for (let i = 0; i < pathItems.length - 1; i++) {
             pathI = "/" + pathItems.slice(0, i+1).join("/") + ".sy";
             children.push(
                 this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle"),
-                this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
+                this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
             );
         }
         // 添加最后一层文档
         pathI = "/" + pathItems.join("/") + ".sy";
         children.push(
             this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last"),
-            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI)
+            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
         );
 
         // 构建容器
@@ -178,14 +180,14 @@ export class ContentRenderer {
      * @param path - 文档路径
      * @returns {VNode} - 面包屑箭头vnode
      */
-    createBreadcrumbArrow(notebookId: string, path: string): VNode {
+    createBreadcrumbArrow(notebookId: string, path: string, menuRightMax: number): VNode {
         // 设置箭头属性
         const arrowAttrs = {
             style: {
                 cursor: "pointer",
             },
             on: {
-                click: this.listChildDocsHandler.bind(this, notebookId, path),
+                click: this.listChildDocsHandler.bind(this, notebookId, path, menuRightMax),
             }
         };
         // 构建图标
@@ -199,9 +201,10 @@ export class ContentRenderer {
      * 点击事件：打开子文档菜单
      * @param notebookId - 笔记本id
      * @param path - 文档路径
+     * @param menuRightMax - 菜单右侧最大位置
      * @param event - 鼠标事件
      */
-    async listChildDocsHandler(notebookId: string, path: string, event: MouseEvent) {
+    async listChildDocsHandler(notebookId: string, path: string, menuRightMax: number, event: MouseEvent) {
         // 阻止事件其他行为
         event.stopPropagation();
         event.preventDefault();
@@ -216,10 +219,7 @@ export class ContentRenderer {
         // 当前元素（面包屑箭头）的位置信息
         const currentTarget = event.currentTarget as HTMLElement;
         const rect = currentTarget.getBoundingClientRect();
-        // 计算菜单最大宽度 = 相邻文档元素最右侧位置 - 面包屑箭头左侧位置
-        const nextTarget = currentTarget.parentElement.nextElementSibling; // 获取“相邻文档”元素
-        const rectNext = nextTarget.getBoundingClientRect();
-        const menuMaxWidth = rectNext.right - rect.left;
+        const menuMaxWidth = menuRightMax - rect.left;
 
         // 获取子文档
         const childDocs = await getChildDocs(notebookId, path);
@@ -255,7 +255,6 @@ export class ContentRenderer {
         // 设置菜单属性
         const menuElement = menu.element as HTMLElement;
         if (menuElement) {
-            // menuElement.style.maxWidth = CONSTANTS.STYLE_CHILDDOCSMENU_MAXWIDTH;
             menuElement.style.maxWidth = `${menuMaxWidth}px`;
         }
 

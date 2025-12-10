@@ -49,6 +49,7 @@ export function testProtyle() {
         logLog("protyle.id", protyle.id);
         logLog("protyle.notebookId", protyle.notebookId);
         logLog("protyle.path", protyle.path);
+        logLog("protyle.rect", protyle.element.getBoundingClientRect());
     });
 }
 

@@ -18,6 +18,7 @@ export interface IProtyleInfo {
     notebookName: string;
     path: string;
     hpath: string;
+    rect: DOMRect;
 }
 
 /**
@@ -41,6 +42,9 @@ export async function getProtyleInfo(protyle: IProtyle): Promise < IProtyleInfo 
     // 笔记本
     const notebookName = notebookConf.conf.name;
 
+    // 窗口
+    const rect = protyle.element.getBoundingClientRect();
+
     // 信息整合
     const result: IProtyleInfo = {
         id,
@@ -49,6 +53,7 @@ export async function getProtyleInfo(protyle: IProtyle): Promise < IProtyleInfo 
         notebookName,
         path,
         hpath,
+        rect,
     }
     return result
 }

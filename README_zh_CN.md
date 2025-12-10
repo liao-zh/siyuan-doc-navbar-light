@@ -47,9 +47,9 @@ src/
 ├── worker/：用于执行主要功能
 │   ├── eventHandler.ts：监听事件
 │   ├── taskProcessor.ts：处理事件触发的任务
-│   ├── contentInjector.ts：对于每个任务，注入面包屑内容
+│   ├── contentRenderer.ts：对于每个任务，渲染面包屑内容
 ├── utils/：提供工具
-│   ├── api.ts：思源API的封装（来自示例）
+│   ├── api.ts：思源API的封装（来自模板）
 │   ├── pluginInstance.ts：插件实例的管理工具
 │   ├── DOMUtils.ts：处理DOM的工具
 │   ├── docUtils.ts：处理文档的工具
