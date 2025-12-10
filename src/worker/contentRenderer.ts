@@ -101,12 +101,14 @@ export class ContentRenderer {
         const spaceVNode = this.createSpace();
         const adjVNode = await this.createAdjacent(protyleInfo);
 
-        // 排列面包屑栏的元素：根据是否要把相邻文档固定在右侧分别排列
+        // 排列面包屑栏的元素
         let fullChildren: VNode[];
-        if ( this.plugin.settingManager.get("pinAdjacentRight") ) {
-            fullChildren = [breadcrumbVNode, spaceVNode, adjVNode];
-        } else {
+        // 相邻文档按钮浮动显示
+        if ( this.plugin.settingManager.get(C.SETTING_KEY_ADJACENTDOC) ) {
             fullChildren = [breadcrumbVNode, adjVNode];
+        // 相邻文档按钮固定在右侧
+        } else {
+            fullChildren = [breadcrumbVNode, spaceVNode, adjVNode];
         }
 
         // 构建面包屑栏
@@ -248,7 +250,7 @@ export class ContentRenderer {
 
         // 新建文档项目
         // 需要考虑更周全：锁定状态不能新建；删除新建的文档时，思源会在右上角提示warning，暂时不知道是什么原因
-        if ( this.plugin.settingManager.get("enableNewDoc") ) {
+        if ( this.plugin.settingManager.get(C.SETTING_KEY_NEWDOC) ) {
             menu.addItem({
                 icon: "iconAdd",
                 label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,

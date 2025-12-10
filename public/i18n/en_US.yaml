@@ -5,9 +5,9 @@ createDoc: "New Doc"
 newDocTitle: "Untitled"
 noChildDocs: "No child docs"
 setting:
-  pinAdjacentRight:
-    title: "Pin adjacent document buttons to the right"
-    description: "When enabled, adjacent document buttons will be pinned to the right. When disabled, the buttons will float with the breadcrumb."
+  floatAdjacentDocs:
+    title: "Float adjacent document buttons"
+    description: "When enabled, adjacent document buttons will float with the breadcrumb. When disabled, the buttons will be pinned to the right."
   enableNewDoc:
     title: "Enable new document creation"
-    description: "When enabled, a new document creation button will be shown when listing child documents. When disabled, the button will not be shown."
+    description: "When enabled, a new document creation button will be shown when listing child documents. When disabled, the button will not be shown. Disabling this can prevent accidental document creation."

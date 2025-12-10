@@ -5,9 +5,9 @@ createDoc: "新建文档"
 newDocTitle: "未命名"
 noChildDocs: "暂无子文档"
 setting:
-  pinAdjacentRight:
-    title: "将相邻文档按钮固定在右侧"
-    description: "选项开启后，相邻文档按钮将固定在右侧，关闭后则按钮随面包屑浮动。"
+  floatAdjacentDocs:
+    title: "相邻文档按钮浮动显示"
+    description: "选项开启后，相邻文档按钮将随面包屑浮动显示，关闭后则按钮固定在右侧。"
   enableNewDoc:
     title: "启用新建文档功能"
     description: "选项开启后，列出子文档时会显示新建文档按钮，关闭后则不显示。关闭可以防止误触新建文档。"

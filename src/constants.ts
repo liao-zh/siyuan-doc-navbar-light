@@ -6,8 +6,8 @@ export class CONSTANTS {
     // 插件设置
     public static readonly SETTING_STORAGE: string = "menu_config";
     public static readonly SETTING_STORAGE_HEIGHT: string = "400px";
-    public static readonly SETTING_KEY_PINADJACENTRIGHT: string = "pinAdjacentRight";
-    public static readonly SETTING_KEY_ENABLENEWDOC: string = "enableNewDoc";
+    public static readonly SETTING_KEY_ADJACENTDOC: string = "floatAdjacentDocs";
+    public static readonly SETTING_KEY_NEWDOC: string = "enableNewDoc";
 
     // 自定义名称
     public static readonly CONTAINER_ATTR: string = "data-plugin-tag";

@@ -37,30 +37,30 @@ export class SettingManager {
 
         // 添加设置项
         this.settingUtils.addItem({
-            key: C.SETTING_KEY_PINADJACENTRIGHT,
+            key: C.SETTING_KEY_ADJACENTDOC,
             value: true,
             type: "checkbox",
-            title: i18nSetting[C.SETTING_KEY_PINADJACENTRIGHT]["title"],
-            description: i18nSetting[C.SETTING_KEY_PINADJACENTRIGHT]["description"],
+            title: i18nSetting[C.SETTING_KEY_ADJACENTDOC]["title"],
+            description: i18nSetting[C.SETTING_KEY_ADJACENTDOC]["description"],
             action: {
                 callback: () => {
-                    let value = !this.settingUtils.get(C.SETTING_KEY_PINADJACENTRIGHT);
-                    this.settingUtils.setAndSave(C.SETTING_KEY_PINADJACENTRIGHT, value);
-                    logger.logDebug(`设置：${C.SETTING_KEY_PINADJACENTRIGHT}`, value);
+                    let value = !this.settingUtils.get(C.SETTING_KEY_ADJACENTDOC);
+                    this.settingUtils.setAndSave(C.SETTING_KEY_ADJACENTDOC, value);
+                    logger.logDebug(`设置：${C.SETTING_KEY_ADJACENTDOC}`, value);
                 }
             }
         });
         this.settingUtils.addItem({
-            key: C.SETTING_KEY_ENABLENEWDOC,
-            value: true,
+            key: C.SETTING_KEY_NEWDOC,
+            value: false,
             type: "checkbox",
-            title: i18nSetting[C.SETTING_KEY_ENABLENEWDOC]["title"],
-            description: i18nSetting[C.SETTING_KEY_ENABLENEWDOC]["description"],
+            title: i18nSetting[C.SETTING_KEY_NEWDOC]["title"],
+            description: i18nSetting[C.SETTING_KEY_NEWDOC]["description"],
             action: {
                 callback: () => {
-                    let value = !this.settingUtils.get(C.SETTING_KEY_ENABLENEWDOC);
-                    this.settingUtils.setAndSave(C.SETTING_KEY_ENABLENEWDOC, value);
-                    logger.logDebug(`设置：${C.SETTING_KEY_ENABLENEWDOC}`, value);
+                    let value = !this.settingUtils.get(C.SETTING_KEY_NEWDOC);
+                    this.settingUtils.setAndSave(C.SETTING_KEY_NEWDOC, value);
+                    logger.logDebug(`设置：${C.SETTING_KEY_NEWDOC}`, value);
                 }
             }
         });
