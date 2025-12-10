@@ -95,10 +95,9 @@ export class ContentRenderer {
      * @returns {VNode} - 面包屑栏vnode
      */
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
-        // 构建面包屑部分
+        // 构建面包屑栏的元素：面包屑部分，空格，相邻文档
         const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
-
-        // 构建相邻文档
+        // const spaceVNode = this.createSpace();
         const adjVNode = await this.createAdjacent(protyleInfo);
 
         // 构建面包屑栏
@@ -111,6 +110,15 @@ export class ContentRenderer {
             [breadcrumbVNode, adjVNode]
         );
         return fullVNode;
+    }
+
+    /**
+     * 构建面包屑栏空格
+     * @returns {VNode} - 空格vnode
+     */
+    createSpace(): VNode {
+        const spaceVNode = h("span.protyle-breadcrumb__space");
+        return spaceVNode;
     }
 
     /**
@@ -232,6 +240,7 @@ export class ContentRenderer {
         const itemStyle = "";
 
         // 新建文档项目
+        // 需要考虑更周全：锁定状态不能新建；删除新建的文档时，思源会在右上角提示warning，暂时不知道是什么原因
         menu.addItem({
             icon: "iconAdd",
             label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
@@ -249,6 +258,14 @@ export class ContentRenderer {
                 click: (_, event) => {
                     openDocHandler(childDoc.id, event);
                 }
+            })
+        }
+
+        // 处理没有子文档的情况
+        if (childDocs.length === 0) {
+            menu.addItem({
+                icon: "iconInfo",
+                label: `<span title="${i18n.noChildDocs}" style="opacity: ${CONSTANTS.STYLE_DISABLED_OPACITY}">${i18n.noChildDocs}</span>`,
             })
         }
 
