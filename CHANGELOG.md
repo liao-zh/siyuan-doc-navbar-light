@@ -92,3 +92,8 @@ UI：
 
 功能：
 - 设置菜单：新增了设置菜单功能，对新建文档和相邻文档按钮位置进行设置
+
+### 0.5.1 (2025-12-11)
+
+改名：
+- 插件名称：从plugin-doc-breadcrumb-light改为siyuan-docbreadcrumb-light

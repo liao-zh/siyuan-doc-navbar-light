@@ -1,9 +1,9 @@
 {
-  "name": "plugin-doc-breadcrumb-light",
-  "version": "0.5.0",
+  "name": "siyuan-docbreadcrumb-light",
+  "version": "0.5.1",
   "type": "module",
   "description": "A light breadcrumb plugin for SiYuan",
-  "repository": "https://gitee.com/liao-zh/plugin-doc-breadcrumb-light",
+  "repository": "https://gitee.com/liao_zh/siyuan-docbreadcrumb-light",
   "homepage": "",
   "author": "Liao-ZH",
   "license": "MIT",

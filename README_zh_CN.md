@@ -3,7 +3,7 @@
 
 作者：Liao-ZH
 
-Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc-breadcrumb-light)
+Gitee仓库：[siyuan-docbreadcrumb-light](https://gitee.com/liao_zh/siyuan-docbreadcrumb-light)
 
 [English Readme](./README.md)
 
@@ -15,9 +15,9 @@ Gitee仓库：[plugin-doc-breadcrumb-light](https://gitee.com/liao-zh/plugin-doc
 
 ## 如何安装
 
-文件准备：下载本repo，解压package.zip，重命名为`plugin-doc-breadcrumb-light`，移动到`工作空间/data/plugins/`目录下。
+文件准备：下载本repo，解压package.zip，重命名为`siyuan-docbreadcrumb-light`，移动到`工作空间/data/plugins/`目录下。
 
-启用插件：在思源笔记中，点击`设置->集市->插件`，找到`简单面包屑（plugin-doc-breadcrumb-light）`，点击`启用`。
+启用插件：在思源笔记中，点击`设置->集市->插件`，找到`简单面包屑（siyuan-docbreadcrumb-light）`，点击`启用`。
 
 ## 功能说明
 
