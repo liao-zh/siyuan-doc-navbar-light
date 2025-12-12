@@ -131,6 +131,12 @@ export async function getChildDocs(notebookId: string, path: string): Promise<IC
         }
     );
 
+    // 检查是否成功获取子文档
+    if (data === null) {
+        logger.logWarn(`获取子文档失败：notebookId=${notebookId}, path=${path}`);
+        return [];
+    }
+
     // 提取子文档的名字和ID
     const childDocs: IChildDoc[] = data.files.map(item => ({
         name: item.name.replace(/\.sy$/, ''),
@@ -182,23 +188,36 @@ export async function createDocHandler(notebookId: string, path: string, event: 
 
     // 新文档名称
     const leaf = `/${getPluginInstance().i18n.newDocTitle}`;
-    // 从path计算hpath
+    // 从path计算hpath，用parentID区分同名的hpath
     let hpath: string;
+    let parentID: string;
     if (path === "/") {
         hpath = leaf;
+        parentID = "";
     } else {
         const pathItems = path.split("/");
-        const docId = pathItems[pathItems.length - 1].replace(/\.sy$/, '');
-        hpath = await getHPathByID(docId);
+        parentID = pathItems[pathItems.length - 1].replace(/\.sy$/, '');
+        hpath = await getHPathByID(parentID);
         hpath = hpath + leaf;
     }
 
     // log
-    logger.logDebug(`新建文档：notebookId=${notebookId}, hpath=${hpath}`);
+    logger.logDebug(`新建文档：notebookId=${notebookId}, hpath=${hpath}, parentID=${parentID}`);
 
     // 新建文档
-    const docId = await createDocWithMd(notebookId, hpath, "");
-
-    // 打开文档
-    openDocHandler(docId, event);
+    const docId = await request(
+        '/api/filetree/createDocWithMd',
+        {
+            notebook: notebookId,
+            path: hpath,
+            parentID: parentID,
+            markdown: "",
+        }
+    );
+    if (docId === null) {
+        logger.logWarn(`新建文档失败：notebookId=${notebookId}, hpath=${hpath}, parentID=${parentID}`);
+    } else {
+        // 打开文档
+        openDocHandler(docId, event);
+    }
 }

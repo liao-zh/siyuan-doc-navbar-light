@@ -97,3 +97,8 @@ UI：
 
 改名：
 - 插件名称：从plugin-doc-breadcrumb-light改为siyuan-docbreadcrumb-light
+
+### 0.5.2 (2025-12-12)
+
+改进：
+- 新建文档：/api/filetree/createDocWithMd时用parentID区分同名的hpath，能处理同名的新建路径了
