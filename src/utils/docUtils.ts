@@ -1,7 +1,7 @@
 import { type IProtyle, openTab } from "siyuan";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
-import { request, getHPathByID, getNotebookConf, createDocWithMd } from "@/utils/api"
+import { request, getHPathByID, getNotebookConf } from "@/utils/api"
 
 /**
  * protyle信息接口

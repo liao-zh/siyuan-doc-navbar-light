@@ -1,12 +1,12 @@
 /**
  * Copyright (c) 2023 frostime. All rights reserved.
  * https://github.com/frostime/sy-plugin-template-vite
- * 
+ *
  * See API Document in [API.md](https://github.com/siyuan-note/siyuan/blob/master/API.md)
  * API 文档见 [API_zh_CN.md](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
  */
 
-import { fetchPost, fetchSyncPost, IWebSocketData } from "siyuan";
+import { fetchPost, fetchSyncPost, type IWebSocketData } from "siyuan";
 
 
 export async function request(url: string, data: any) {
@@ -338,8 +338,8 @@ export async function getFile(path: string): Promise<any> {
 
 /**
  * fetchPost will secretly convert data into json, this func merely return Blob
- * @param endpoint 
- * @returns 
+ * @param endpoint
+ * @returns
  */
 export const getFileBlob = async (path: string): Promise<Blob | null> => {
     const endpoint = '/api/file/getFile'
