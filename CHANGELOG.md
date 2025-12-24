@@ -102,3 +102,8 @@ UI：
 
 改进：
 - 新建文档：/api/filetree/createDocWithMd时用parentID区分同名的hpath，能处理同名的新建路径了
+
+### 0.5.3 (2025-12-24)
+
+改进：
+- 事件监听：加上了监听create事件，及时更新面包屑

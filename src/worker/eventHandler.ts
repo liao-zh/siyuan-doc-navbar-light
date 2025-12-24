@@ -109,8 +109,8 @@ export class EventHandler {
      */
     async handleWSMain(event: CustomEvent<IEventBusMap["ws-main"]>) {
         // logger.logDebug("ws-main事件：", event.detail.cmd);
-        const cmdType = ["moveDoc", "rename", "removeDoc"];
-        // 仅处理移动、重命名、删除文档事件
+        const cmdType = ["moveDoc", "rename", "removeDoc", "create"];
+        // 仅处理移动、重命名、删除、新建文档事件
         if (cmdType.includes(event.detail.cmd)) {
             logger.logDebug(`触发事件：ws-main(${event.detail.cmd})"`, event);
             await this.handleProtyleAllShowing();

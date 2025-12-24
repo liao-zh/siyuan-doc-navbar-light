@@ -36,7 +36,7 @@ Gitee仓库：[siyuan-docbreadcrumb-light](https://gitee.com/liao_zh/siyuan-docb
 ## 代码说明
 
 方法：
-- 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc）。
+- 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc，create）。
 - 渲染面包屑：用了snabbdom虚拟DOM，只在DOM变化时渲染，提高了性能，减少更新时界面的闪烁。
 - 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序。
 - 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档，传入可读路径，同时传入parentID参数以确保存在同名可读路径时，实际的路径唯一。
