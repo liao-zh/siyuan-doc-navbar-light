@@ -88,7 +88,7 @@ export class EventHandler {
      * @param event - 加载静态文档事件
      */
     async handleLoadedProtyleStatic(event: CustomEvent<IEventBusMap["loaded-protyle-static"]>) {
-        logger.logDebug("触发事件：loaded-protyle-static", event);
+        // logger.logDebug("触发事件：loaded-protyle-static", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
@@ -98,7 +98,7 @@ export class EventHandler {
      * @param event - 切换文档事件
      */
     async handleSwitchProtyle(event: CustomEvent<IEventBusMap["switch-protyle"]>) {
-        logger.logDebug("触发事件：switch-protyle", event);
+        // logger.logDebug("触发事件：switch-protyle", event);
         const protyle = event.detail.protyle;
         this.taskProcessor.addTask({protyle, replace: false});
     }
@@ -112,7 +112,7 @@ export class EventHandler {
         const cmdType = ["moveDoc", "rename", "removeDoc", "create"];
         // 仅处理移动、重命名、删除、新建文档事件
         if (cmdType.includes(event.detail.cmd)) {
-            logger.logDebug(`触发事件：ws-main(${event.detail.cmd})"`, event);
+            // logger.logDebug(`触发事件：ws-main(${event.detail.cmd})"`, event);
             await this.handleProtyleAllShowing();
         }
     }

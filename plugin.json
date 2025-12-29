@@ -2,7 +2,7 @@
   "name": "siyuan-docbreadcrumb-light",
   "author": "liao-zh",
   "url": "https://gitee.com/liao_zh/siyuan-docbreadcrumb-light",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "minAppVersion": "3.0.12",
   "backends": [
     "windows",

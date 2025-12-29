@@ -30,7 +30,7 @@ export default class PluginDocBreadcrumbLight extends Plugin {
     }
 
     onLayoutReady() {
-        logger.logInfo("开启插件");
+        logger.logInfo("布局就绪");
 
         // 事件处理器绑定
         this.eventHandler.bindHandler();

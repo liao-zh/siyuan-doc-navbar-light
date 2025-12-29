@@ -68,8 +68,8 @@ export class ContentRenderer {
 
         // 获取protyle信息
         const protyleInfo = await getProtyleInfo(protyle);
-        logger.logDebug("插入元素：protyle信息", protyleInfo);
-        logger.logDebug("插入元素：vnode缓存", Array.from(this.vnodesCache.keys()));
+        // logger.logDebug("插入元素：protyle信息", protyleInfo);
+        // logger.logDebug("插入元素：vnode缓存", Array.from(this.vnodesCache.keys()));
 
         // 构建vnode
         const vnodeNew = await this.renderProtyle(protyleInfo);
@@ -227,7 +227,7 @@ export class ContentRenderer {
         event.preventDefault();
 
         // log
-        logger.logDebug(`打开子文档菜单：notebookId=${notebookId}, path=${path}`);
+        // logger.logDebug(`打开子文档菜单：notebookId=${notebookId}, path=${path}`);
 
         // 获取信息
         const i18n = getPluginInstance().i18n;

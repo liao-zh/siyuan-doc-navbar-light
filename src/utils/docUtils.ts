@@ -157,7 +157,7 @@ export function openDocHandler(docId: string, event: MouseEvent) {
     event.preventDefault();
 
     // log
-    logger.logDebug(`打开文档：docId=${docId}`);
+    // logger.logDebug(`打开文档：docId=${docId}`);
 
     // 打开新标签页
     openTab({
@@ -202,7 +202,7 @@ export async function createDocHandler(notebookId: string, path: string, event: 
     }
 
     // log
-    logger.logDebug(`新建文档：notebookId=${notebookId}, hpath=${hpath}, parentID=${parentID}`);
+    // logger.logDebug(`新建文档：notebookId=${notebookId}, hpath=${hpath}, parentID=${parentID}`);
 
     // 新建文档
     const docId = await request(

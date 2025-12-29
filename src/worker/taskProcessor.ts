@@ -39,12 +39,12 @@ export class TaskProcessor {
         // 添加任务到队列
         if (!this.processingIds.has(id)) {
             this.taskQueue.push(task);
-            logger.logDebug(`任务调度：protyle-${id}，队列中不存在，已添加，当前队列长度: ${this.taskQueue.length}`);
+            // logger.logDebug(`任务调度：protyle-${id}，队列中不存在，已添加，当前队列长度: ${this.taskQueue.length}`);
         } else if (task.replace) {
             // this.taskQueue.push(task);
-            logger.logDebug(`任务调度：protyle-${id}，队列中已存在，但需要替换，已添加，当前队列长度: ${this.taskQueue.length}`);
+            // logger.logDebug(`任务调度：protyle-${id}，队列中已存在，但需要替换，已添加，当前队列长度: ${this.taskQueue.length}`);
         } else {
-            logger.logDebug(`任务调度：protyle-${id}，队列中已存在，且不需替换，跳过添加，当前队列长度: ${this.taskQueue.length}`);
+            // logger.logDebug(`任务调度：protyle-${id}，队列中已存在，且不需替换，跳过添加，当前队列长度: ${this.taskQueue.length}`);
         }
 
         // 如果队列未开始处理，启动处理
@@ -64,10 +64,10 @@ export class TaskProcessor {
             const task = this.taskQueue.shift();
             const id = task.protyle.id;
             try {
-                logger.logDebug(`任务调度：protyle-${id}，从队列中取出处理，当前队列长度: ${this.taskQueue.length}`);
+                // logger.logDebug(`任务调度：protyle-${id}，从队列中取出处理，当前队列长度: ${this.taskQueue.length}`);
                 this.processingIds.add(id);
                 await this.processTask(task);
-                logger.logDebug(`任务调度：protyle-${id}，处理完成`);
+                // logger.logDebug(`任务调度：protyle-${id}，处理完成`);
             } catch (error) {
                 logger.logError(`任务调度：protyle-${id}，处理时出错：`, error);
             } finally {
@@ -92,7 +92,7 @@ export class TaskProcessor {
     clearAllTasks(): void {
         this.taskQueue = [];
         this.processingIds.clear();
-        logger.logDebug("任务调度：所有任务已清空");
+        // logger.logDebug("任务调度：所有任务已清空");
     }
 }
 
