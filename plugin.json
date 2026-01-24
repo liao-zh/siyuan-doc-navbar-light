@@ -1,33 +1,28 @@
 {
-  "name": "siyuan-docbreadcrumb-light",
+  "name": "siyuan-doc-navbar-light",
   "author": "liao-zh",
-  "url": "https://gitee.com/liao_zh/siyuan-docbreadcrumb-light",
-  "version": "0.5.4",
-  "minAppVersion": "3.0.12",
+  "url": "https://github.com/liao-zh/siyuan-doc-navbar-light",
+  "version": "0.6.0",
+  "minAppVersion": "3.5.0",
   "backends": [
-    "windows",
-    "linux",
-    "darwin",
-    "ios",
-    "android",
-    "harmony",
-    "docker"
+    "all"
   ],
   "frontends": [
     "desktop",
     "browser-desktop",
     "desktop-window"
   ],
+  "disabledInPublish": true,
   "displayName": {
-    "en_US": "Light doc breadcrumb",
-    "zh_CN": "简单文档面包屑"
+    "default": "Light Doc NavBar",
+    "zh_CN": "简易文档导航条"
   },
   "description": {
-    "en_US": "A light breadcrumb plugin for SiYuan",
-    "zh_CN": "一个简单的思源文档面包屑插件"
+    "default": "A light document navigation bar plugin for SiYuan",
+    "zh_CN": "一个文档导航条插件，在编辑区顶部显示文档路径和相邻文档"
   },
   "readme": {
-    "en_US": "README.md",
+    "default": "README.md",
     "zh_CN": "README_zh_CN.md"
   },
   "funding": {
@@ -36,9 +31,9 @@
     ]
   },
   "keywords": [
-    "breadcrumb",
     "navigate",
-    "面包屑",
-    "导航"
+    "breadcrumb",
+    "导航",
+    "面包屑"
   ]
 }

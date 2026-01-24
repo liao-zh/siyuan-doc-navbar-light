@@ -9,4 +9,4 @@ dev
 dist
 build
 tmp
-copy_to_siyuan.ps1
+local_commands.ps1
