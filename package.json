@@ -1,6 +1,6 @@
 {
   "name": "siyuan-doc-navbar-light",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "A light document navigation bar plugin for SiYuan",
   "repository": "https://github.com/liao-zh/siyuan-doc-navbar-light",

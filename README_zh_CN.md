@@ -1,27 +1,21 @@
 
-# 思源笔记-简单面包屑插件
+# 思源笔记-简易文档导航条插件
 
-作者：Liao-ZH
+作者：liao-zh
 
-Gitee仓库：[siyuan-docbreadcrumb-light](https://gitee.com/liao_zh/siyuan-docbreadcrumb-light)
+链接：[GitHub仓库](https://github.com/liao-zh/siyuan-doc-navbar-light)，[Gitee仓库](https://gitee.com/liao_zh/siyuan-doc-navbar-light)
 
-[English Readme](./README.md)
+## 缘起
 
-[更新历史](./CHANGELOG.md)
+思源集市已经有了一些好用的导航插件，如[文档层级导航](https://github.com/OpaqueGlass/syplugin-hierarchyNavigate)，[(伪)文档面包屑](https://github.com/OpaqueGlass/syplugin-fakeDocBreadcrumb)，[文档上下文](https://github.com/frostime/sy-doc-context)，不过各人需求不同，我在使用中发现自己需要的是这些插件功能的结合体与简化体，于是有了这个插件。
 
-## 简介
+本插件在块面包屑上方添加了一个导航条，导航条中显示文档面包屑，并且可以跳转相邻文档、各层级文档和子文档。
 
-本插件为思源笔记添加了一个简单便捷的文档面包屑，保持显示在已有的块面包屑的上方。可跳转上一篇/下一篇，列出子文档，新建文档。
-
-## 如何安装
-
-文件准备：下载本repo，解压package.zip，重命名为`siyuan-docbreadcrumb-light`，移动到`工作空间/data/plugins/`目录下。
-
-启用插件：在思源笔记中，点击`设置->集市->插件`，找到`简单面包屑（siyuan-docbreadcrumb-light）`，点击`启用`。
+显示在块面包屑上方，可以保持导航条一直显示。跳转相邻文档，便于查看日记等有顺序的文档树。对本文档的子文档和路径中各层级的子文档的显示逻辑进行了统一。
 
 ## 功能说明
 
-显示：在块面包屑上方显示当前文档的路径（文档面包屑），以及相邻文档（上一篇/下一篇）。相邻文档的顺序与文档树中的顺序相同。
+显示：在块面包屑上方显示当前文档的路径（文档面包屑），以及相邻文档按钮（上一篇/下一篇）。相邻文档的顺序与文档树中的顺序相同。
 
 打开文档：单击面包屑中的各层级，或者上一篇/下一篇，可以打开对应的文档。Alt+单击时在右侧新页签打开，Ctrl+单击时在后台打开，二者可同时使用。
 
@@ -31,15 +25,38 @@ Gitee仓库：[siyuan-docbreadcrumb-light](https://gitee.com/liao_zh/siyuan-docb
 
 新建文档：单击面包屑层级间的箭头，在与列出文档相同的层级新建文档，支持Alt/Ctrl+单击打开新文档。
 
-设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否能够新建文档。
+设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否显示新建文档按钮。
+
+## 版本更新
+
+完整更新历史参见：[CHANGELOG](https://github.com/liao-zh/siyuan-doc-navbar-light/blob/main/CHANGELOG.md)（需要网络能访问github）。
+
+主要和近期更新历史：
+- 0.5.x：完善了基本功能，包括文档面包屑、相邻文档、子文档、新建文档、设置项
+- 0.6.x：上架集市
+
+存在的问题：
+- 平台：不支持移动端
+- 新建文档：在编辑锁定状态下也能新建
+- 外观：使用集市中或自定义的外观时，如果改变了块面包屑样式，可能会对文档面包屑造成改变
+
+
+## 致谢
+
+[plugin-sample-vite-svelte](https://github.com/siyuan-note/plugin-sample-vite-svelte)：插件模板，本插件基于此模板开发
+
+[(伪)面包屑插件](https://github.com/OpaqueGlass/syplugin-fakeDocBreadcrumb)：参考了基本的布局
+
+[文档导航插件](https://github.com/OpaqueGlass/syplugin-hierarchyNavigate)：参考了代码架构和功能实现
+
 
 ## 代码说明
 
 方法：
-- 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc，create）。
-- 渲染面包屑：用了snabbdom虚拟DOM，只在DOM变化时渲染，提高了性能，减少更新时界面的闪烁。
-- 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序。
-- 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档，传入可读路径，同时传入parentID参数以确保存在同名可读路径时，实际的路径唯一。
+- 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc，create）
+- 渲染导航条：用了snabbdom虚拟DOM，只在DOM变化时渲染，提高了性能，减少更新时界面的闪烁
+- 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序
+- 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档，传入可读路径，同时传入parentID参数以确保存在同名可读路径时，实际的路径唯一
 
 代码结构：（未列出的部分与插件示例相同）
 ```bash
@@ -50,7 +67,7 @@ src/
 │   ├── settingManager.ts：设置管理器
 │   ├── eventHandler.ts：监听事件
 │   ├── taskProcessor.ts：处理事件触发的任务
-│   ├── contentRenderer.ts：对于每个任务，渲染面包屑内容
+│   ├── contentRenderer.ts：对于每个任务，渲染导航条内容
 ├── utils/：提供工具
 │   ├── api.ts：思源API的封装（来自模板）
 │   ├── pluginInstance.ts：插件实例的管理工具
@@ -59,20 +76,6 @@ src/
 │   ├── logger.ts：日志工具
 ```
 
-## 问题
-
-支持的平台：暂时不支持移动端。
-
-功能：
-- 新建文档：在编辑锁定状态下也能新建。新建的文档删除时思源右上角会报警告。
-
-外观：
-- 使用集市中或自定义的外观时，如果改变了块面包屑样式，可能会对文档面包屑造成意想不到的改变。
-
-性能：
-- 如果移动文档树，可能会触发大量moveDoc事件，导致插件大量的查找和更新操作。如果速度慢，可以先把所有文档关闭。
-
-
-## 参考
-
-本插件的架构基于插件示例[plugin-sample-vite-svelte](https://github.com/siyuan-note/plugin-sample-vite-svelte)。在总体思路、逻辑和很多具体实现上参考了OpaqueGlass的[文档导航插件](https://github.com/OpaqueGlass/syplugin-hierarchyNavigate)和[面包屑插件](https://github.com/OpaqueGlass/syplugin-fakeDocBreadcrumb)。
+手动安装插件：
+- 下载并解压package.zip，重命名为`siyuan-inbox-transfer`，移动到`<思源工作空间>/data/plugins/`目录下
+- 在思源笔记中，点击`设置->集市->已下载->插件`，找到`收集箱中转站（siyuan-inbox-transfer）`，点击`启用`

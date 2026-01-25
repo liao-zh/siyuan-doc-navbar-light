@@ -4,7 +4,7 @@
  * @Date         : 2023-12-17 18:28:19
  * @FilePath     : /src/libs/setting-utils.ts
  * @LastEditTime : 2024-05-01 17:44:16
- * @Description  : 
+ * @Description  :
  */
 
 import { Plugin, Setting } from 'siyuan';
@@ -12,8 +12,8 @@ import { Plugin, Setting } from 'siyuan';
 
 /**
  * The default function to get the value of the element
- * @param type 
- * @returns 
+ * @param type
+ * @returns
  */
 const createDefaultGetter = (type: TSettingItemType) => {
     let getter: (ele: HTMLElement) => any;
@@ -46,8 +46,8 @@ const createDefaultGetter = (type: TSettingItemType) => {
 
 /**
  * The default function to set the value of the element
- * @param type 
- * @returns 
+ * @param type
+ * @returns
  */
 const createDefaultSetter = (type: TSettingItemType) => {
     let setter: (ele: HTMLElement, value: any) => void;
@@ -118,7 +118,7 @@ export class SettingUtils {
 
     async load() {
         let data = await this.plugin.loadData(this.file);
-        console.debug('Load config:', data);
+        // console.debug('Load config:', data);
         if (data) {
             for (let [key, item] of this.settings) {
                 item.value = data?.[key] ?? item.value;
@@ -131,7 +131,7 @@ export class SettingUtils {
     async save(data?: any) {
         data = data ?? this.dump();
         await this.plugin.saveData(this.file, this.dump());
-        console.debug('Save config:', data);
+        // console.debug('Save config:', data);
         return data;
     }
 
@@ -145,7 +145,7 @@ export class SettingUtils {
     }
 
     /**
-     * Set data to this.settings, 
+     * Set data to this.settings,
      * but do not save it to the configuration file
      * @param key key name
      * @param value value

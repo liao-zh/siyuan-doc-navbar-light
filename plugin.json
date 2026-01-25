@@ -2,7 +2,7 @@
   "name": "siyuan-doc-navbar-light",
   "author": "liao-zh",
   "url": "https://github.com/liao-zh/siyuan-doc-navbar-light",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "minAppVersion": "3.5.0",
   "backends": [
     "all"
@@ -14,7 +14,7 @@
   ],
   "disabledInPublish": true,
   "displayName": {
-    "default": "Light Doc NavBar",
+    "default": "Doc NavBar Light",
     "zh_CN": "简易文档导航条"
   },
   "description": {

@@ -1,9 +1,10 @@
-// 制作和插入面包屑
-
+/**
+ * 文档导航条内容渲染器
+ */
 import { type IProtyle, Menu, getAllEditor } from "siyuan";
 import { CONSTANTS as C } from "@/constants";
 import { getPluginInstance } from "@/utils/pluginInstance";
-import * as logger from "@/utils/logger";
+// import * as logger from "@/utils/logger";
 import { selectInjectedInProtyle } from "@/utils/DOMUtils";
 import { type IProtyleInfo, getProtyleInfo, getAdjacentDocs, getChildDocs, openDocHandler, createDocHandler } from "@/utils/docUtils";
 import { init, h, VNode } from "snabbdom";
@@ -46,15 +47,15 @@ export class ContentRenderer {
     }
 
     /**
-     * 对给定protyle更新整个面包屑栏
+     * 对给定protyle更新导航条
      * DOM：面包屑-空格-相邻文档
-     * @param protyle 要更新面包屑的protyle
+     * @param protyle 需要更新导航条的protyle
      */
     async update(protyle: IProtyle) {
         // 判断是否存在块面包屑
         const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
         if (!blockBreadcrumb) {
-            logger.logDebug("插入元素：不存在块面包屑，退出");
+            // logger.logDebug("插入元素：不存在块面包屑，退出");
             return;
         }
 
@@ -91,17 +92,17 @@ export class ContentRenderer {
     }
 
     /**
-     * 构建整个面包屑栏
+     * 构建导航条
      * @param protyleInfo - protyle信息
-     * @returns {VNode} - 面包屑栏vnode
+     * @returns {VNode} - 导航条vnode
      */
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
-        // 构建面包屑栏的元素：面包屑部分，空格，相邻文档
+        // 构建导航条的元素：面包屑，空格，相邻文档
         const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
         const spaceVNode = this.createSpace();
         const adjVNode = await this.createAdjacent(protyleInfo);
 
-        // 排列面包屑栏的元素
+        // 排列导航条的元素
         let fullChildren: VNode[];
         // 相邻文档按钮浮动显示
         if ( this.plugin.settingManager.get(C.SETTING_KEY_ADJACENTDOC) ) {
@@ -111,7 +112,7 @@ export class ContentRenderer {
             fullChildren = [breadcrumbVNode, spaceVNode, adjVNode];
         }
 
-        // 构建面包屑栏
+        // 构建导航条
         const fullAttrs = {
             attrs: {
                 [C.CONTAINER_ATTR]: `${C.CONTAINER_VALUE}`,
@@ -122,7 +123,7 @@ export class ContentRenderer {
     }
 
     /**
-     * 构建面包屑栏空格
+     * 构建导航条空格
      * @returns {VNode} - 空格vnode
      */
     createSpace(): VNode {
@@ -244,12 +245,12 @@ export class ContentRenderer {
         // 构建菜单
         const menu = new Menu();
         // 设置菜单项文本最大宽度
-        // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth - Number(C.STYLE_CHILDDOCSMENUITEM_MAXWIDTH_DELTA)}px; overflow: clip; text-overflow: ellipsis;`;
+        // const itemStyle = `display: inline-block; max-width: ${menuMaxWidth-45}px; overflow: clip; text-overflow: ellipsis;`;
         // 不设置文本项最大宽度
         const itemStyle = "";
 
         // 新建文档项目
-        // 需要考虑更周全：锁定状态不能新建；删除新建的文档时，思源会在右上角提示warning，暂时不知道是什么原因
+        // 需要考虑更周全：锁定状态不能新建
         if ( this.plugin.settingManager.get(C.SETTING_KEY_NEWDOC) ) {
             menu.addItem({
                 icon: "iconAdd",

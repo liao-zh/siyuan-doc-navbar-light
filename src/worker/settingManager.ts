@@ -1,4 +1,6 @@
-// 管理设置
+/**
+ * 插件设置管理
+ */
 import { SettingUtils } from "@/libs/setting-utils";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { CONSTANTS as C } from "@/constants";
@@ -46,7 +48,7 @@ export class SettingManager {
                 callback: () => {
                     let value = !this.settingUtils.get(C.SETTING_KEY_ADJACENTDOC);
                     this.settingUtils.setAndSave(C.SETTING_KEY_ADJACENTDOC, value);
-                    logger.logDebug(`设置：${C.SETTING_KEY_ADJACENTDOC}`, value);
+                    // logger.logDebug(`设置：${C.SETTING_KEY_ADJACENTDOC}`, value);
                 }
             }
         });
@@ -60,7 +62,7 @@ export class SettingManager {
                 callback: () => {
                     let value = !this.settingUtils.get(C.SETTING_KEY_NEWDOC);
                     this.settingUtils.setAndSave(C.SETTING_KEY_NEWDOC, value);
-                    logger.logDebug(`设置：${C.SETTING_KEY_NEWDOC}`, value);
+                    // logger.logDebug(`设置：${C.SETTING_KEY_NEWDOC}`, value);
                 }
             }
         });

@@ -1,4 +1,6 @@
-// 触发事件处理器
+/**
+ * 触发事件处理器
+ */
 import {
     Plugin,
     type IEventBusMap,

@@ -1,5 +1,4 @@
 import { Plugin } from "siyuan";
-import "@/index.scss";
 
 import { SettingManager } from "./worker/settingManager";
 import { EventHandler } from "./worker/eventHandler";
@@ -7,7 +6,6 @@ import { CONSTANTS as C } from "./constants";
 import { setPluginInstance } from "./utils/pluginInstance";
 import { removeInjected } from "./utils/DOMUtils";
 import * as logger from "./utils/logger";
-import * as test from "./test/test";
 
 export default class PluginDocBreadcrumbLight extends Plugin {
     settingManager: SettingManager;
@@ -16,15 +14,11 @@ export default class PluginDocBreadcrumbLight extends Plugin {
     async onload() {
         logger.logInfo("加载插件");
 
-        this.data[C.SETTING_STORAGE] = { Check: true };
-
         // 设置插件实例
         setPluginInstance(this);
 
-        // 设置插件设置
+        // 初始化
         this.settingManager = new SettingManager();
-
-        // 事件处理器初始化
         this.eventHandler = new EventHandler();
 
     }
@@ -35,8 +29,6 @@ export default class PluginDocBreadcrumbLight extends Plugin {
         // 事件处理器绑定
         this.eventHandler.bindHandler();
 
-        // 测试
-        // test.testEventbus();
     }
 
     async onunload() {
@@ -49,7 +41,10 @@ export default class PluginDocBreadcrumbLight extends Plugin {
 
     async uninstall() {
         logger.logInfo("卸载插件");
-        await this.onunload();
+        // 卸载插件时删除插件数据
+        this.removeData(`${C.SETTING_STORAGE}.json`).catch(e => {
+            logger.logWarn(`卸载时删除插件数据失败：${e.msg}`);
+        });
     }
 
 }

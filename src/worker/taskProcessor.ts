@@ -1,3 +1,6 @@
+/**
+ * 任务处理调度器
+ */
 import { type IProtyle } from "siyuan";
 import { ContentRenderer } from "@/worker/contentRenderer";
 import * as logger from "@/utils/logger";
