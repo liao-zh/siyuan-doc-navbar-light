@@ -36,8 +36,7 @@ export default defineConfig({
                 { src: "./README*.md", dest: "./" },
                 { src: "./plugin.json", dest: "./" },
                 { src: "./preview.png", dest: "./" },
-                { src: "./icon.png", dest: "./" },
-                { src: "./CHANGELOG.md", dest: "./" },
+                { src: "./icon.png", dest: "./" }
             ],
         }),
 
