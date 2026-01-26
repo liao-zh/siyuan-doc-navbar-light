@@ -26,6 +26,32 @@ By displaying it above the block breadcrumb, the navigation bar remains visible 
 
 **Settings**: Settings are available in the menu to configure display options, including whether adjacent documents are displayed in a floating manner and whether to show the new document button.
 
+## Theme Adaptation
+
+Some themes may require adding CSS snippets for adaptation.
+
+Method: SiYuan Settings -> Appearance -> Code Snippet Settings -> CSS -> Add CSS, the title can be customized (e.g., "Simple Document Navbar Plugin: Theme Adaptation"), add CSS code in the snippet, then click Enable and OK.
+
+```css
+/*
+  Savor Theme
+  style/module/breadcrumb.css sets separate styles for not(last-child), here we unify all child styles
+*/
+[data-light-theme=Savor], [data-dark-theme=Savor]  {
+  .protyle-breadcrumb, .protyle-breadcrumb__bar {
+    .protyle-breadcrumb__item:last-child{
+  		opacity: 0.6;
+  		transition: opacity 300ms linear;
+  	}
+    &:hover .protyle-breadcrumb__item:last-child {
+  		transition: opacity 300ms linear;
+  		opacity: 1;
+  	}
+  }
+}
+```
+
+
 ## Version Updates
 
 For the complete update history, see: [CHANGELOG](https://github.com/liao-zh/siyuan-doc-navbar-light/blob/main/CHANGELOG.md) (requires internet access to GitHub).

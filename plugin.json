@@ -2,7 +2,7 @@
   "name": "siyuan-doc-navbar-light",
   "author": "liao-zh",
   "url": "https://github.com/liao-zh/siyuan-doc-navbar-light",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "minAppVersion": "3.5.0",
   "backends": [
     "all"

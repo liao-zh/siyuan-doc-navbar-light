@@ -27,6 +27,31 @@
 
 设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否显示新建文档按钮。
 
+## 主题适配
+
+一些主题可能需要添加css片段来适配。
+
+方法：思源设置->外观->代码片段设置->css->添加css，标题可以自定义（如“简易文档导航条插件：适配主题”），在代码片段里添加css代码，点击启用和确定。
+
+```css
+/*
+  Savor主题
+  style/module/breadcrumb.css里单独设置了not(last-child)的样式，这里让所有child样式统一
+*/
+[data-light-theme=Savor], [data-dark-theme=Savor]  {
+  .protyle-breadcrumb, .protyle-breadcrumb__bar {
+    .protyle-breadcrumb__item:last-child{
+  		opacity: 0.6;
+  		transition: opacity 300ms linear;
+  	}
+    &:hover .protyle-breadcrumb__item:last-child {
+  		transition: opacity 300ms linear;
+  		opacity: 1;
+  	}
+  }
+}
+```
+
 ## 版本更新
 
 完整更新历史参见：[CHANGELOG](https://github.com/liao-zh/siyuan-doc-navbar-light/blob/main/CHANGELOG.md)（需要网络能访问github）。
