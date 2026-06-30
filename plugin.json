@@ -2,8 +2,8 @@
   "name": "siyuan-doc-navbar-light",
   "author": "liao-zh",
   "url": "https://github.com/liao-zh/siyuan-doc-navbar-light",
-  "version": "0.6.2",
-  "minAppVersion": "3.5.0",
+  "version": "0.7.0",
+  "minAppVersion": "3.7.0",
   "backends": [
     "all"
   ],
@@ -15,15 +15,15 @@
   "disabledInPublish": true,
   "displayName": {
     "default": "Doc NavBar Light",
-    "zh_CN": "简易文档导航条"
+    "zh-CN": "简易文档导航条"
   },
   "description": {
     "default": "A light document navigation bar plugin for SiYuan",
-    "zh_CN": "一个文档导航条插件，在编辑区顶部显示文档路径和相邻文档"
+    "zh-CN": "一个文档导航条插件，在编辑区顶部显示文档路径和相邻文档"
   },
   "readme": {
     "default": "README.md",
-    "zh_CN": "README_zh_CN.md"
+    "zh-CN": "README_zh-CN.md"
   },
   "funding": {
     "custom": [
