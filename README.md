@@ -2,7 +2,7 @@
 
 Author: liao-zh
 
-Links: [GitHub Repository](https://github.com/liao-zh/siyuan-doc-navbar-light), [Gitee Repository](https://gitee.com/liao_zh/siyuan-doc-navbar-light)
+Links: [GitHub Repository](https://github.com/liao-zh/siyuan-doc-navbar-light), [GitCode Repository](https://gitcode.com/liao-zh/siyuan-doc-navbar-light)
 
 ## Background
 
@@ -59,7 +59,7 @@ For the complete update history, see: [CHANGELOG](https://github.com/liao-zh/siy
 Major and recent update history:
 - 0.5.x: Improved basic functionality, including document breadcrumbs, adjacent documents, subdocuments, new document creation, and settings
 - 0.6.x: Listed in the marketplace
-- 0.7.x: Adapted to SiYuan v3.7.0
+- 0.7.x: Adapted to SiYuan v3.7.0, migrated from gitee to gitcode
 
 Known issues:
 - Platform: Mobile devices are not supported

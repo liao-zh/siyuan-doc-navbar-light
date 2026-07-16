@@ -3,7 +3,7 @@
 
 作者：liao-zh
 
-链接：[GitHub仓库](https://github.com/liao-zh/siyuan-doc-navbar-light)，[Gitee仓库](https://gitee.com/liao_zh/siyuan-doc-navbar-light)
+链接：[GitHub仓库](https://github.com/liao-zh/siyuan-doc-navbar-light)，[GitCode仓库](https://gitcode.com/liao-zh/siyuan-doc-navbar-light)
 
 ## 缘起
 
@@ -59,7 +59,7 @@
 主要和近期更新历史：
 - 0.5.x：完善了基本功能，包括文档面包屑、相邻文档、子文档、新建文档、设置项
 - 0.6.x：上架集市
-- 0.7.x：适配思源v3.7.0
+- 0.7.x：适配思源v3.7.0，从gitee迁移至gitcode
 
 存在的问题：
 - 平台：不支持移动端
@@ -103,5 +103,5 @@ src/
 ```
 
 手动安装插件：
-- 下载并解压package.zip，重命名为`siyuan-inbox-transfer`，移动到`<思源工作空间>/data/plugins/`目录下
-- 在思源笔记中，点击`设置->集市->已下载->插件`，找到`收集箱中转站（siyuan-inbox-transfer）`，点击`启用`
+- 下载并解压package.zip，重命名为`siyuan-doc-navbar-light`，移动到`<思源工作空间>/data/plugins/`目录下
+- 在思源笔记中，点击`设置->集市->已下载->插件`，找到`简易文档导航条（siyuan-doc-navbar-light）`，点击`启用`
