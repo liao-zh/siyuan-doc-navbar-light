@@ -147,17 +147,51 @@ export async function getChildDocs(notebookId: string, path: string): Promise<IC
 
 
 /**
+ * 聚焦导航条所在窗格的编辑器内容
+ * @description 思源通过编辑器内容区的 focusin 事件（setPanelFocus）更新活动窗格（layout__wnd--active），
+ * 而导航条位于面包屑区域（wysiwyg 之外），点击不会触发 focusin，
+ * 导致分屏时文档在焦点窗格而非被点击导航条所在窗格打开。
+ * 此处对目标窗格 wysiwyg 调用真实 focus()，由浏览器原生触发 focusin，
+ * 复用思源自身的激活逻辑；原生事件派发时监听器异常不会阻断后续代码。
+ * @param protyleElement - 导航条所在的 protyle 元素
+ */
+function focusProtyleWindow(protyleElement: HTMLElement | null) {
+    // 仅处理真实 DOM 元素；snabbdom 事件处理器会额外传入 vnode 等对象，
+    // 无法定位到 protyle（如浮窗内的导航条）时跳过，沿用思源默认行为
+    if (!(protyleElement instanceof HTMLElement)) {
+        return;
+    }
+    const wndElement = protyleElement.closest('[data-type="wnd"]') as HTMLElement | null;
+    // 不在窗格内或已是活动窗格时不处理
+    if (!wndElement || wndElement.classList.contains("layout__wnd--active")) {
+        return;
+    }
+    // 桌面端 .protyle-wysiwyg 本身 contenteditable="true"，聚焦即触发思源 focusin 监听器
+    try {
+        const wysiwygElement = protyleElement.querySelector(".protyle-wysiwyg") as HTMLElement | null;
+        wysiwygElement?.focus({ preventScroll: true });
+    } catch (e) {
+        logger.logWarn(`聚焦导航条所在窗格失败：${e}`);
+    }
+}
+
+/**
  * 点击事件：打开文档
  * @param docId - 文档id
  * @param event - 鼠标事件
+ * @param protyleElement - 导航条所在的 protyle 元素（菜单项点击时显式传入，其余情况自动推导）
  */
-export function openDocHandler(docId: string, event: MouseEvent) {
+export function openDocHandler(docId: string, event: MouseEvent, protyleElement?: HTMLElement) {
     // 阻止事件其他行为
     event.stopPropagation();
     event.preventDefault();
 
     // log
     // logger.logDebug(`打开文档：docId=${docId}`);
+
+    // 分屏时先聚焦被点击导航条所在窗格，使文档在该窗格打开
+    // 第三个参数仅在菜单项场景显式传入；直接点击场景会被 snabbdom 传入 vnode，需按 DOM 元素推导
+    focusProtyleWindow(protyleElement instanceof HTMLElement ? protyleElement : ((event.currentTarget as HTMLElement)?.closest(".protyle") as HTMLElement));
 
     // 打开新标签页
     openTab({
@@ -178,9 +212,10 @@ export function openDocHandler(docId: string, event: MouseEvent) {
  * @param notebookId - 笔记本id
  * @param path - 文档路径
  * @param event - 鼠标事件
+ * @param protyleElement - 导航条所在的 protyle 元素（菜单项点击时显式传入）
  * @issue 用思源API创建文档时，如果hpath开始几个层级相同，看上去会在顺序在前的路径下创建
  */
-export async function createDocHandler(notebookId: string, path: string, event: MouseEvent) {
+export async function createDocHandler(notebookId: string, path: string, event: MouseEvent, protyleElement?: HTMLElement) {
     // 阻止事件其他行为
     event.stopPropagation();
     event.preventDefault();
@@ -218,6 +253,6 @@ export async function createDocHandler(notebookId: string, path: string, event: 
         logger.logWarn(`新建文档失败：notebookId=${notebookId}, hpath=${hpath}, parentID=${parentID}`);
     } else {
         // 打开文档
-        openDocHandler(docId, event);
+        openDocHandler(docId, event, protyleElement);
     }
 }

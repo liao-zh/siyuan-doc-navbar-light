@@ -231,6 +231,9 @@ export class ContentRenderer {
         // 获取信息
         const i18n = getPluginInstance().i18n;
 
+        // 捕获导航条所在的 protyle 元素，供菜单项点击时在对应窗格打开文档
+        const protyleElement = (event.currentTarget as HTMLElement)?.closest(".protyle") as HTMLElement;
+
         // 计算位置
         // 当前元素（面包屑箭头）的位置信息
         const currentTarget = event.currentTarget as HTMLElement;
@@ -254,7 +257,7 @@ export class ContentRenderer {
                 icon: "iconAdd",
                 label: `<span title="${i18n.createDoc}" style="${itemStyle}">${i18n.createDoc}</span>`,
                 click: (_, event) => {
-                    createDocHandler(notebookId, path, event);
+                    createDocHandler(notebookId, path, event, protyleElement);
                 }
             })
         }
@@ -266,7 +269,7 @@ export class ContentRenderer {
                 icon: "iconFile",
                 label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
                 click: (_, event) => {
-                    openDocHandler(childDoc.id, event);
+                    openDocHandler(childDoc.id, event, protyleElement);
                 }
             })
         }
@@ -380,7 +383,8 @@ function createItem({
             ...(isClickable && { nodeId: id }),
         },
         on: {
-            ...(isClickable && { click: openDocHandler.bind(null, id) }),
+            // 用箭头函数显式只传事件，避免 snabbdom 额外传入 vnode 污染 openDocHandler 的参数
+            ...(isClickable && { click: (event: MouseEvent) => openDocHandler(id, event) }),
         },
     };
 

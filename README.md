@@ -50,12 +50,15 @@ For the complete update history, see: [CHANGELOG](https://github.com/liao-zh/siy
 Major and recent update history:
 - 0.5.x: Improved basic functionality, including document breadcrumbs, adjacent documents, subdocuments, new document creation, and settings
 - 0.6.x: Listed in the marketplace
-- 0.7.x: Adapted to SiYuan v3.7.0, migrated from gitee to gitcode
+- 0.7.0: Adapted to SiYuan v3.7.0
+- 0.7.2: Migrated from gitee to gitcode
+- 0.7.3-4: Fixed issues including the horizontal scrollbar of the adjacent document area under some themes and opening documents in the clicked pane in split view
 
 Known issues:
 - Platform: Mobile devices are not supported
 - New document creation: Can be created even in edit-locked state
 - Appearance: When using marketplace or custom themes that modify block breadcrumb styles, it may affect document breadcrumbs
+- Split view: When the target document is already open in another pane, clicking the navigation buttons focuses the existing tab (SiYuan's default behavior, consistent with the file tree)
 
 ## Acknowledgments
 
