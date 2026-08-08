@@ -28,26 +28,16 @@ By displaying it above the block breadcrumb, the navigation bar remains visible 
 
 ## Theme Adaptation
 
-Some themes may require adding CSS snippets for adaptation.
+The current document item has built-in protection: regardless of how a theme dims breadcrumb items by position (e.g., the Savor theme's `:not(:last-child)` rule), the current document item always stays fully visible, with no extra setup required. Other path items still inherit the theme's breadcrumb styles, staying consistent with SiYuan's own breadcrumb.
+
+If other themes have adaptation issues, you can add CSS snippets yourself.
 
 Method: SiYuan Settings -> Appearance -> Code Snippet Settings -> CSS -> Add CSS, the title can be customized (e.g., "Simple Document Navbar Plugin: Theme Adaptation"), add CSS code in the snippet, then click Enable and OK.
 
 ```css
-/*
-  Savor Theme
-  style/module/breadcrumb.css sets separate styles for not(last-child), here we unify all child styles
-*/
-[data-light-theme=Savor], [data-dark-theme=Savor]  {
-  .protyle-breadcrumb, .protyle-breadcrumb__bar {
-    .protyle-breadcrumb__item:last-child{
-  		opacity: 0.6;
-  		transition: opacity 300ms linear;
-  	}
-    &:hover .protyle-breadcrumb__item:last-child {
-  		transition: opacity 300ms linear;
-  		opacity: 1;
-  	}
-  }
+/* Example: if a theme dims the current document item in the plugin's navbar, restore it within the plugin container */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__item.siyuan-doc-navbar-light__item--current {
+    opacity: 1;
 }
 ```
 

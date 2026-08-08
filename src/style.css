@@ -40,3 +40,9 @@
     color: var(--b3-theme-on-background);
     background-color: var(--b3-list-hover);
 }
+
+/* 当前文档项：始终完整显示，防止主题按位置压暗（如 Savor 的 :not(:last-child) 规则）
+   特异性 (0,4,0) + !important，胜过任何主题的面包屑 opacity 普通声明 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__bar .protyle-breadcrumb__item.siyuan-doc-navbar-light__item--current {
+    opacity: 1 !important;
+}

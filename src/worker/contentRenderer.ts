@@ -185,6 +185,7 @@ export class ContentRenderer {
             iconName: type === "notebook" ? "#iconFolder" : "#iconFile", // 笔记本用文件夹图标，文档用文件图标
             isClickable: type !== "notebook", // 除了笔记本，都可以点击
             maxWidth: type === "doc-middle" ? C.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
+            itemClass: type === "doc-last" ? "protyle-breadcrumb__item siyuan-doc-navbar-light__item--current" : undefined, // 当前文档项加标记类，配合样式防止主题按位置压暗
         })
         return itemVNode;
     }

@@ -29,26 +29,16 @@
 
 ## 主题适配
 
-一些主题可能需要添加css片段来适配。
+当前文档项已内置保护：无论主题如何按位置压暗面包屑项（如 Savor 主题的 `:not(:last-child)` 规则），当前文档项都会保持完整显示，无需额外设置。路径项仍继承主题的面包屑样式，与思源自身的面包屑保持一致。
 
-方法：思源设置->外观->代码片段设置->css->添加css，标题可以自定义（如“简易文档导航条插件：适配主题”），在代码片段里添加css代码，点击启用和确定。
+其他主题如有适配问题，可自行添加 CSS 片段。
+
+方法：思源设置->外观->代码片段设置->css->添加css，标题可以自定义（如"简易文档导航条插件：适配主题"），在代码片段里添加css代码，点击启用和确定。
 
 ```css
-/*
-  Savor主题
-  style/module/breadcrumb.css里单独设置了not(last-child)的样式，这里让所有child样式统一
-*/
-[data-light-theme=Savor], [data-dark-theme=Savor]  {
-  .protyle-breadcrumb, .protyle-breadcrumb__bar {
-    .protyle-breadcrumb__item:last-child{
-  		opacity: 0.6;
-  		transition: opacity 300ms linear;
-  	}
-    &:hover .protyle-breadcrumb__item:last-child {
-  		transition: opacity 300ms linear;
-  		opacity: 1;
-  	}
-  }
+/* 示例：如果某个主题压暗了插件导航条中的当前文档项，可以在插件容器内将其恢复 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__item.siyuan-doc-navbar-light__item--current {
+    opacity: 1;
 }
 ```
 
