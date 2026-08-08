@@ -12,5 +12,4 @@ export class CONSTANTS {
     // HTML元素样式
     public static readonly STYLE_DISABLED_OPACITY: string = "0.5";
     public static readonly STYLE_BREADCRUMBITEM_MAXWIDTH: string = "160px";
-    public static readonly STYLE_ADJACENT_MINWIDTH: string = "160px";
 }

@@ -1,3 +1,4 @@
+import "./style.css";
 import { Plugin } from "siyuan";
 
 import { SettingManager } from "./worker/settingManager";

@@ -51,6 +51,7 @@ Method: SiYuan Settings -> Appearance -> Code Snippet Settings -> CSS -> Add CSS
 }
 ```
 
+The adjacent document area (Previous/Next) uses the plugin's own styles and is not affected by the theme's breadcrumb styles.
 
 ## Version Updates
 

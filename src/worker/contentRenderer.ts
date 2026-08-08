@@ -99,18 +99,13 @@ export class ContentRenderer {
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
         // 构建导航条的元素：面包屑，空格，相邻文档
         const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
-        const spaceVNode = this.createSpace();
+        // 相邻文档按钮浮动显示时，空格元素不撑开，仅提供固定间距
+        const float = this.plugin.settingManager.get(C.SETTING_KEY_ADJACENTDOC);
+        const spaceVNode = this.createSpace(float);
         const adjVNode = await this.createAdjacent(protyleInfo);
 
-        // 排列导航条的元素
-        let fullChildren: VNode[];
-        // 相邻文档按钮浮动显示
-        if ( this.plugin.settingManager.get(C.SETTING_KEY_ADJACENTDOC) ) {
-            fullChildren = [breadcrumbVNode, adjVNode];
-        // 相邻文档按钮固定在右侧
-        } else {
-            fullChildren = [breadcrumbVNode, spaceVNode, adjVNode];
-        }
+        // 排列导航条的元素：面包屑 + 空格 + 相邻文档
+        const fullChildren: VNode[] = [breadcrumbVNode, spaceVNode, adjVNode];
 
         // 构建导航条
         const fullAttrs = {
@@ -124,10 +119,12 @@ export class ContentRenderer {
 
     /**
      * 构建导航条空格
+     * @param float - 是否浮动显示（浮动时空格仅提供固定间距，不撑开）
      * @returns {VNode} - 空格vnode
      */
-    createSpace(): VNode {
-        const spaceVNode = h("span.protyle-breadcrumb__space");
+    createSpace(float: boolean): VNode {
+        const spaceAttrs = float ? { style: { flex: "0 0 8px" } } : {};
+        const spaceVNode = h("span.protyle-breadcrumb__space", spaceAttrs);
         return spaceVNode;
     }
 
@@ -307,24 +304,10 @@ export class ContentRenderer {
         const prevVNode = this.createAdjacentItem(adjDocs.prevId, adjDocs.prevName, "prev");
         const nextVNode = this.createAdjacentItem(adjDocs.nextId, adjDocs.nextName, "next");
 
-        // 构建假元素，应对有些外观样式（如Savor）会将第一个元素的图标改掉
-        const shaddowVNode = createItem({
-            id: null,
-            name: null,
-            innerHTML: "",
-            iconName: "#iconFile",
-            isClickable: false,
-            naOpacity: "0",
-        })
-
-        // 构建相邻元素：[假元素，上一篇，下一篇]
-        const adjAttrs = {
-            style: {
-                minWidth: C.STYLE_ADJACENT_MINWIDTH,
-            }
-        }
-        const adjVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", adjAttrs,
-            [shaddowVNode, prevVNode, nextVNode]
+        // 构建相邻元素：[上一篇，下一篇]
+        // 相邻文档区域使用插件自持样式类，避免主题按位置改 .protyle-breadcrumb__item 的样式（如 Savor 的 :first-child）
+        const adjVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap.siyuan-doc-navbar-light__adjacent-bar",
+            [prevVNode, nextVNode]
         )
         return adjVNode;
     }
@@ -345,6 +328,7 @@ export class ContentRenderer {
             iconName: type === "prev" ? "#iconBack" : "#iconForward",
             isClickable: (id !== null), // 存在相邻文档时才可点击
             naOpacity: C.STYLE_DISABLED_OPACITY, // 不可点击时灰化
+            itemClass: "siyuan-doc-navbar-light__item", // 相邻文档项使用插件自持样式
         })
         return itemVNode
     }
@@ -361,6 +345,7 @@ export class ContentRenderer {
  * @param app - 思源插件app
  * @param maxWidth? - 最大宽度
  * @param naOpacity? - 不可点击时的透明度
+ * @param itemClass? - 自定义样式类（传入时替换默认的面包屑项类）
  * @returns {VNode} - 面包屑项样式的vnode
  */
 function createItem({
@@ -371,6 +356,7 @@ function createItem({
         isClickable,
         maxWidth,
         naOpacity,
+        itemClass,
     }: {
         id: string;
         name: string;
@@ -379,6 +365,7 @@ function createItem({
         isClickable: boolean;
         maxWidth?: string;
         naOpacity?: string;
+        itemClass?: string;
     }): VNode {
 
     // 设置item属性
@@ -408,7 +395,9 @@ function createItem({
     const textVNode = h("span.protyle-breadcrumb__text", textAttrs, innerHTML);
 
     // 构建面包屑项
-    const itemVNode = h("span.protyle-breadcrumb__item", itemAttrs,
+    // 有 itemClass 时仅使用自定义类（相邻文档项，避免主题位置样式影响），否则使用思源面包屑项类
+    const itemClassSelector = itemClass || "protyle-breadcrumb__item";
+    const itemVNode = h(`span.${itemClassSelector}`, itemAttrs,
     [
         svgVNode,
         textVNode

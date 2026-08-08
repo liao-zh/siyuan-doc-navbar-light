@@ -52,6 +52,8 @@
 }
 ```
 
+相邻文档区域（上一篇/下一篇）使用插件自持样式，不随主题的面包屑样式变化。
+
 ## 版本更新
 
 完整更新历史参见：[CHANGELOG](https://github.com/liao-zh/siyuan-doc-navbar-light/blob/main/CHANGELOG.md)（需要网络能访问github）。

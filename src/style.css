@@ -1,0 +1,42 @@
+/* 简易文档导航条插件：导航条样式 */
+/* 作用域限定在插件容器内，不影响思源自身的面包屑 */
+
+/* 外层容器：极端窄宽时裁剪溢出，保证不出现横向滚动条、不溢出编辑器 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] {
+    overflow: hidden;
+}
+
+/* 相邻文档区域：内容定宽、不收缩、不内滚 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__adjacent-bar {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+/* 相邻文档项：插件自持样式类，
+   避免主题按位置改 .protyle-breadcrumb__item 的样式（如 Savor 的 :first-child / :not(:last-child)） */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    line-height: 24px;
+    height: 24px;
+    border-radius: var(--b3-border-radius);
+    margin: 3px 0;
+    color: var(--b3-theme-on-surface);
+    border: 0;
+    background-color: transparent;
+    box-sizing: border-box;
+}
+
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__item > svg {
+    height: 14px;
+    width: 14px;
+    flex-shrink: 0;
+    color: var(--b3-theme-on-surface);
+}
+
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__item:hover {
+    color: var(--b3-theme-on-background);
+    background-color: var(--b3-list-hover);
+}
