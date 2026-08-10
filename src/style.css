@@ -41,6 +41,26 @@
     background-color: var(--b3-list-hover);
 }
 
+/* 面包屑箭头：插件自持样式类，hover 时显示与文档名一致的凹陷强调背景 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__arrow {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 24px;
+    height: 24px;
+    border-radius: var(--b3-border-radius);
+    margin: 3px 0;
+    border: 0;
+    background-color: transparent;
+    box-sizing: border-box;
+}
+
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__arrow:hover {
+    background-color: var(--b3-list-hover);
+}
+
 /* 当前文档项：始终完整显示，防止主题按位置压暗（如 Savor 的 :not(:last-child) 规则）
    特异性 (0,4,0) + !important，胜过任何主题的面包屑 opacity 普通声明 */
 [data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__bar .protyle-breadcrumb__item.siyuan-doc-navbar-light__item--current {

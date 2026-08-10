@@ -209,7 +209,7 @@ export class ContentRenderer {
         // 构建图标
         const svgVNode = createSvg("protyle-breadcrumb__arrow", "#iconRight");
         // 构建箭头
-        const arrowVNode = h("span", arrowAttrs, [ svgVNode ]);
+        const arrowVNode = h("span.siyuan-doc-navbar-light__arrow", arrowAttrs, [ svgVNode ]);
         return arrowVNode;
     }
 
