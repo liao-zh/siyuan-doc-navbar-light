@@ -1,9 +1,37 @@
 /* 简易文档导航条插件：导航条样式 */
 /* 作用域限定在插件容器内，不影响思源自身的面包屑 */
 
-/* 外层容器：极端窄宽时裁剪溢出，保证不出现横向滚动条、不溢出编辑器 */
+/* 外层容器：紧贴思源原生面包屑之前、不作为编辑器直接子级的 flex 行容器；
+   极端窄宽时裁剪溢出，保证不出现横向滚动条、不溢出编辑器 */
 [data-plugin-tag="siyuan-doc-navbar-light-container"] {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     overflow: hidden;
+    /* 作为 .protyle(flex 列) 的子项禁止收缩：
+       浮窗预览等环境的列内兄弟项总高超出容器高度时，会按比例挤压本容器（42px 被压到 2px），
+       主编辑器列不溢出时此项无副作用 */
+    flex: 0 0 auto;
+}
+
+/* 导航条主体：弹性占满剩余宽度并允许收缩，把右侧原生按钮挤出到最右 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* 被搬入的原生块面包屑：固定在导航条最右、保留锁编辑/文档菜单/更多按钮 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] > .protyle-breadcrumb:not(.siyuan-doc-navbar-light__main) {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+}
+
+/* 隐藏原生路径条与空格：仅保留右侧按钮（退出聚焦/上下文按钮本身 fn__none 隐藏） */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] > .protyle-breadcrumb:not(.siyuan-doc-navbar-light__main) > .protyle-breadcrumb__bar,
+[data-plugin-tag="siyuan-doc-navbar-light-container"] > .protyle-breadcrumb:not(.siyuan-doc-navbar-light__main) > .protyle-breadcrumb__space {
+    display: none;
 }
 
 /* 相邻文档区域：内容定宽、不收缩、不内滚 */
@@ -65,4 +93,16 @@
    特异性 (0,4,0) + !important，胜过任何主题的面包屑 opacity 普通声明 */
 [data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__bar .protyle-breadcrumb__item.siyuan-doc-navbar-light__item--current {
     opacity: 1 !important;
+}
+
+/* 导航条主体内的面包屑条：强制单行（特异性 (0,4,0) + !important，
+   免疫主题覆盖 flex-wrap），避免长文档名折行撑高行 42px、浮窗盖住下一行项 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__main .protyle-breadcrumb__bar {
+    flex-wrap: nowrap !important;
+}
+
+/* 条内超宽时横向滚动（原生 __bar 自带 overflow:auto 且隐藏滚动条，
+   此处 scoped 声明防主题覆盖），长文档名保持完整可读、不溢出容器 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__main .protyle-breadcrumb__bar {
+    overflow-x: auto;
 }

@@ -2,10 +2,29 @@ import { type IProtyle } from "siyuan";
 import { CONSTANTS as C } from "../constants";
 
 /**
+ * 移除包装容器前，若思源原生块面包屑被搬入容器内，先还原为容器的兄弟节点
+ * 原生面包屑的按钮事件委托在其根元素上，不能被插件误删，移除容器前必须还原
+ * @param elem - 插件外包装容器元素
+ */
+function restoreNativeBreadcrumbBeforeRemove(elem: Element) {
+    Array.from(elem.children).forEach(child => {
+        if (child instanceof HTMLElement
+            && child.classList.contains("protyle-breadcrumb")
+            && !child.classList.contains(C.MAIN_CLASS)
+            && !child.hasAttribute(C.CONTAINER_ATTR)) {
+            elem.insertAdjacentElement("afterend", child);
+        }
+    });
+}
+
+/**
  * 移除所有已经插入的内容
  */
 export function removeInjected() {
-    document.querySelectorAll(`[${C.CONTAINER_ATTR}="${C.CONTAINER_VALUE}"]`).forEach(elem => elem.remove());
+    document.querySelectorAll(`[${C.CONTAINER_ATTR}="${C.CONTAINER_VALUE}"]`).forEach(elem => {
+        restoreNativeBreadcrumbBeforeRemove(elem);
+        elem.remove();
+    });
 }
 
 /**
@@ -13,7 +32,10 @@ export function removeInjected() {
  * @param protyle - protyle对象
  */
 export function removeInjectedFromProtyle(protyle: IProtyle) {
-    protyle.element.querySelectorAll(`[${C.CONTAINER_ATTR}="${C.CONTAINER_VALUE}"]`).forEach(elem => elem.remove());
+    protyle.element.querySelectorAll(`[${C.CONTAINER_ATTR}="${C.CONTAINER_VALUE}"]`).forEach(elem => {
+        restoreNativeBreadcrumbBeforeRemove(elem);
+        elem.remove();
+    });
 }
 
 /**

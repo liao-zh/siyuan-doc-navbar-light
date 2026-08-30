@@ -13,3 +13,6 @@ setting:
   enableNewDoc:
     title: "启用新建文档功能"
     description: "选项开启后，列出子文档时会显示新建文档按钮，关闭后则不显示。关闭可以防止误触新建文档。"
+  hideBlockBreadcrumb:
+    title: "隐藏块面包屑"
+    description: "选项开启后，隐藏思源原生块面包屑的路径条，并将锁编辑、文档菜单、更多按钮并入文档导航条右侧；关闭后恢复原布局。"

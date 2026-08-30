@@ -24,7 +24,7 @@ By displaying it above the block breadcrumb, the navigation bar remains visible 
 
 **Create New Document**: Click the arrow between breadcrumb levels to create a new document at the same level as the listed documents, with support for Alt/Ctrl+click to open the new document.
 
-**Settings**: Settings are available in the menu to configure display options, including whether adjacent documents are displayed in a floating manner and whether to show the new document button.
+**Settings**: Settings are available in the menu to configure display options, including whether adjacent documents are displayed in a floating manner and whether to show the new document button. You can also choose to hide the path bar of SiYuan's block breadcrumb.
 
 ## Theme Adaptation
 
@@ -54,6 +54,7 @@ Major and recent update history:
 - 0.7.2: Migrated from gitee to gitcode
 - 0.7.3-4: Fixed issues including the horizontal scrollbar of the adjacent document area under some themes and opening documents in the clicked pane in split view
 - 0.7.6: Adjacent document buttons changed to icon-only display, with hover tooltips showing the document name or "This is the first/last document"
+- 0.8.0: Added the "Hide Block Breadcrumb" setting, which can merge the lock edit/document menu/more buttons of SiYuan's block breadcrumb into the document navigation bar; floating window previews behave consistently with the main editor
 
 Known issues:
 - Platform: Mobile devices are not supported

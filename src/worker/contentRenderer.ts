@@ -48,23 +48,37 @@ export class ContentRenderer {
 
     /**
      * 对给定protyle更新导航条
-     * DOM：面包屑-空格-相邻文档
+     * DOM：外包装容器/{导航条主体（snabbdom patch），[搬入的原生块面包屑]}
      * @param protyle 需要更新导航条的protyle
      */
     async update(protyle: IProtyle) {
-        // 判断是否存在块面包屑
-        const blockBreadcrumb = protyle.element.querySelector(".protyle-breadcrumb");
-        if (!blockBreadcrumb) {
+        // 定位思源原生块面包屑根元素：排除插件自己的导航条（同为 .protyle-breadcrumb，且先插入 DOM）
+        const blockBreadcrumb = protyle.element.querySelector(
+            `.protyle-breadcrumb:not([${C.CONTAINER_ATTR}]):not(.${C.MAIN_CLASS})`
+        );
+        if ( !blockBreadcrumb ) {
             // logger.logDebug("插入元素：不存在块面包屑，退出");
             return;
         }
 
-        // 选择插入的容器
+        // 选择/创建外包装容器，插在块面包屑之前
+        // 容器带 data-plugin-tag 标记，但不再被 snabbdom 整体接管（仅 patch 其内的导航条主体子节点）
         let container = selectInjectedInProtyle(protyle);
-        // 如果没有容器则创建一个，插入块面包屑之前
         if ( container === null ) {
             container = document.createElement("div");
+            container.setAttribute(C.CONTAINER_ATTR, C.CONTAINER_VALUE);
             blockBreadcrumb.insertAdjacentElement("beforebegin", container);
+        }
+
+        // 确保容器内存在导航条主体子节点（首次创建或主体丢失时重建）
+        let main = container.querySelector(`.${C.MAIN_CLASS}`) as HTMLElement | null;
+        let mainCreated = false;
+        if ( main === null ) {
+            main = document.createElement("div");
+            main.className = `protyle-breadcrumb ${C.MAIN_CLASS}`;
+            // 主体始终保持在第一个子节点位置，被搬入的原生面包屑在其后
+            container.insertBefore(main, container.firstChild);
+            mainCreated = true;
         }
 
         // 获取protyle信息
@@ -75,17 +89,35 @@ export class ContentRenderer {
         // 构建vnode
         const vnodeNew = await this.renderProtyle(protyleInfo);
 
-        // patch更新DOM
-        const vnodeRec = this.vnodesCache.get(protyleInfo.id);
+        // 仅patch导航条主体子节点，搬入的原生面包屑作为兄弟节点不受影响
+        // 主体重建时旧缓存的 vnode 指向已脱离 DOM 的节点，需先清理，退回直接 patch 新主体
+        let vnodeRec = this.vnodesCache.get(protyleInfo.id);
+        if ( mainCreated && vnodeRec ) {
+            this.vnodesCache.delete(protyleInfo.id);
+            vnodeRec = undefined;
+        }
         let vnodePatch: VNode;
         // 如果缓存中不存在vnode，则直接patch
         if ( !vnodeRec ) {
-            vnodePatch = this.patch(container, vnodeNew);
+            vnodePatch = this.patch(main, vnodeNew);
             // 如果缓存中存在vnode，则patch更新
         } else {
             vnodePatch = this.patch(vnodeRec, vnodeNew);
         }
         this.vnodesCache.set(protyleInfo.id, vnodePatch);
+
+        // 按开关搬移/还原原生块面包屑
+        // 开启：整体搬入容器最右侧（按钮事件委托在原生根元素上，整体搬移保留全部原生功能）
+        if ( this.plugin.settingManager.get(C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB) ) {
+            if ( blockBreadcrumb.parentElement !== container ) {
+                container.appendChild(blockBreadcrumb);
+            }
+        } else {
+            // 关闭：还原为容器的兄弟节点（容器之后），顺序与改造前一致（幂等）
+            if ( blockBreadcrumb.parentElement === container ) {
+                container.insertAdjacentElement("afterend", blockBreadcrumb);
+            }
+        }
 
         // 清理vnode缓存
         this.clearInactiveCache();
@@ -107,13 +139,9 @@ export class ContentRenderer {
         // 排列导航条的元素：面包屑 + 空格 + 相邻文档
         const fullChildren: VNode[] = [breadcrumbVNode, spaceVNode, adjVNode];
 
-        // 构建导航条
-        const fullAttrs = {
-            attrs: {
-                [C.CONTAINER_ATTR]: `${C.CONTAINER_VALUE}`,
-            }
-        };
-        const fullVNode = h("div.protyle-breadcrumb", fullAttrs, fullChildren);
+        // 构建导航条主体
+        // 不再携带 data-plugin-tag（外包装容器已带），根加标记类，与搬入的原生块面包屑区分
+        const fullVNode = h(`div.protyle-breadcrumb.${C.MAIN_CLASS}`, fullChildren);
         return fullVNode;
     }
 

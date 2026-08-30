@@ -66,6 +66,20 @@ export class SettingManager {
                 }
             }
         });
+        this.settingUtils.addItem({
+            key: C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB,
+            value: false,
+            type: "checkbox",
+            title: i18nSetting[C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB]["title"],
+            description: i18nSetting[C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB]["description"],
+            action: {
+                callback: () => {
+                    let value = !this.settingUtils.get(C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB);
+                    this.settingUtils.setAndSave(C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB, value);
+                    // logger.logDebug(`设置：${C.SETTING_KEY_HIDE_BLOCK_BREADCRUMB}`, value);
+                }
+            }
+        });
     }
 
     /**

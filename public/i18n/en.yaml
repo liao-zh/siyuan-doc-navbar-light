@@ -13,3 +13,6 @@ setting:
   enableNewDoc:
     title: "Enable new document creation"
     description: "When enabled, a new document creation button will be shown when listing child documents. When disabled, the button will not be shown. Disabling this can prevent accidental document creation."
+  hideBlockBreadcrumb:
+    title: "Hide block breadcrumb"
+    description: "When enabled, hides the path bar of SiYuan's block breadcrumb and merges the lock edit, document menu, and more buttons into the right side of the document navigation bar; when disabled, restores the original layout."
