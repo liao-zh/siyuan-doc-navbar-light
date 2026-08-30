@@ -1,6 +1,8 @@
 ---
 adjDocPrev: "Previous"
 adjDocNext: "Next Doc"
+adjDocNoPrev: "This is the first document"
+adjDocNoNext: "This is the last document"
 createDoc: "New Doc"
 newDocTitle: "Untitled"
 noChildDocs: "No child docs"

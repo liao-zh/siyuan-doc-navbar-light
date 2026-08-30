@@ -325,14 +325,21 @@ export class ContentRenderer {
      */
     createAdjacentItem(id: string, name: string , type: "prev" | "next"): VNode {
         const i18n = getPluginInstance().i18n;
+        const hasAdjDoc = (id !== null);
+        // 有相邻文档：提示「上一篇/下一篇：文档名」；无相邻文档：提示「已是第一篇/最后一篇」
+        const label = type === "prev" ? i18n.adjDocPrev : i18n.adjDocNext;
+        const noneLabel = type === "prev" ? i18n.adjDocNoPrev : i18n.adjDocNoNext;
         const itemVNode = createItem({
             id,
             name,
-            innerHTML: type === "prev" ? i18n.adjDocPrev : i18n.adjDocNext,
+            innerHTML: "",
             iconName: type === "prev" ? "#iconBack" : "#iconForward",
-            isClickable: (id !== null), // 存在相邻文档时才可点击
+            isClickable: hasAdjDoc, // 存在相邻文档时才可点击
             naOpacity: C.STYLE_DISABLED_OPACITY, // 不可点击时灰化
             itemClass: "siyuan-doc-navbar-light__item", // 相邻文档项使用插件自持样式
+            showText: false, // 相邻文档按钮仅显示图标
+            // hover 原生 title：有相邻文档显示文档名，无则显示已是首/末篇
+            ariaLabel: hasAdjDoc ? `${label}：${name || "—"}` : noneLabel,
         })
         return itemVNode
     }
@@ -350,6 +357,8 @@ export class ContentRenderer {
  * @param maxWidth? - 最大宽度
  * @param naOpacity? - 不可点击时的透明度
  * @param itemClass? - 自定义样式类（传入时替换默认的面包屑项类）
+ * @param ariaLabel? - 仅图标模式下悬停提示文本（原生 title，不受容器 overflow 裁剪影响）
+ * @param showText? - 是否显示文本，false 时仅显示图标（默认 true）
  * @returns {VNode} - 面包屑项样式的vnode
  */
 function createItem({
@@ -361,6 +370,8 @@ function createItem({
         maxWidth,
         naOpacity,
         itemClass,
+        ariaLabel,
+        showText = true,
     }: {
         id: string;
         name: string;
@@ -370,10 +381,16 @@ function createItem({
         maxWidth?: string;
         naOpacity?: string;
         itemClass?: string;
+        ariaLabel?: string;
+        showText?: boolean;
     }): VNode {
 
     // 设置item属性
     const itemAttrs = {
+        attrs: {
+            // 仅图标模式下附加原生 title，悬停显示「上一篇/下一篇：文档名」
+            ...(ariaLabel && { title: ariaLabel }),
+        },
         style: {
             ...(maxWidth && { "max-width": maxWidth }),
             ...(!isClickable && naOpacity && { "opacity": naOpacity }),
@@ -403,10 +420,8 @@ function createItem({
     // 有 itemClass 时仅使用自定义类（相邻文档项，避免主题位置样式影响），否则使用思源面包屑项类
     const itemClassSelector = itemClass || "protyle-breadcrumb__item";
     const itemVNode = h(`span.${itemClassSelector}`, itemAttrs,
-    [
-        svgVNode,
-        textVNode
-    ]);
+        showText ? [ svgVNode, textVNode ] : [ svgVNode ]
+    );
 
     return itemVNode;
 }

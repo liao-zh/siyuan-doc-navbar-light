@@ -1,6 +1,8 @@
 ---
 adjDocPrev: "上一篇"
 adjDocNext: "下一篇"
+adjDocNoPrev: "已是第一篇文档"
+adjDocNoNext: "已是最后一篇文档"
 createDoc: "新建文档"
 newDocTitle: "未命名"
 noChildDocs: "暂无子文档"

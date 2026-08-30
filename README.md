@@ -18,7 +18,7 @@ By displaying it above the block breadcrumb, the navigation bar remains visible 
 
 **Open Documents**: Click on each level in the breadcrumbs, or previous/next buttons, to open the corresponding document. Alt+click to open in a new tab on the right, Ctrl+click to open in the background, and both can be used simultaneously.
 
-**Preview Documents**: When the cursor hovers over text, the corresponding full name is displayed. When hovering over icons, document previews are shown.
+**Preview Documents**: When the cursor hovers over text in breadcrumb items, the corresponding full name is displayed; when hovering over icons, document previews are shown. The adjacent document buttons (Previous/Next) are displayed as icons only: hovering shows "Previous/Next: <doc name>"; when there is no adjacent document, it shows "This is the first/last document". Hovering the icon a bit longer shows the document preview popover.
 
 **Child Documents**: Click the arrow between breadcrumb levels to display a list of subdocuments for the level on the left side of the arrow. Click to navigate, with support for Alt/Ctrl+click.
 
@@ -53,6 +53,7 @@ Major and recent update history:
 - 0.7.0: Adapted to SiYuan v3.7.0
 - 0.7.2: Migrated from gitee to gitcode
 - 0.7.3-4: Fixed issues including the horizontal scrollbar of the adjacent document area under some themes and opening documents in the clicked pane in split view
+- 0.7.6: Adjacent document buttons changed to icon-only display, with hover tooltips showing the document name or "This is the first/last document"
 
 Known issues:
 - Platform: Mobile devices are not supported
