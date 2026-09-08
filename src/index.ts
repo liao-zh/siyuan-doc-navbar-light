@@ -24,6 +24,11 @@ export default class PluginDocBreadcrumbLight extends Plugin {
 
     }
 
+    // 思源 v3.4+ 数据监听机制：覆写声明以避免插件存储数据变化时被整体 reload
+    // （未覆写时，收到 sync/overwrite 数据变更会被判定为未感知数据变化而强制整插件重载；
+    //   插件已有 eventBus/ws-main 刷新逻辑，因此保持空实现，勿重复刷新）
+    onDataChanged() {}
+
     onLayoutReady() {
         logger.logInfo("布局就绪");
 
