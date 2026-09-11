@@ -39,15 +39,14 @@ export class TaskProcessor {
     addTask(task: ITask): void {
         const id = task.protyle.id;
 
-        // 添加任务到队列
-        if (!this.processingIds.has(id)) {
+        // 队列中已有该 protyle 的任务时无需重复排队（稍后取出处理时会读取最新状态）
+        const queued = this.taskQueue.some(t => t.protyle.id === id);
+
+        // 正在处理中的 protyle 若来了 replace 任务（移动/重命名/删除文档、设置变更后的全量刷新），
+        // 必须入队：否则这笔刷新会正好撞在在飞的渲染上被丢弃，导航条停留在旧状态
+        if (!queued && (!this.processingIds.has(id) || task.replace)) {
             this.taskQueue.push(task);
-            // logger.logDebug(`任务调度：protyle-${id}，队列中不存在，已添加，当前队列长度: ${this.taskQueue.length}`);
-        } else if (task.replace) {
-            // this.taskQueue.push(task);
-            // logger.logDebug(`任务调度：protyle-${id}，队列中已存在，但需要替换，已添加，当前队列长度: ${this.taskQueue.length}`);
-        } else {
-            // logger.logDebug(`任务调度：protyle-${id}，队列中已存在，且不需替换，跳过添加，当前队列长度: ${this.taskQueue.length}`);
+            // logger.logDebug(`任务调度：protyle-${id}，已入队，当前队列长度: ${this.taskQueue.length}`);
         }
 
         // 如果队列未开始处理，启动处理

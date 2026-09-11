@@ -118,11 +118,16 @@ export async function getAdjacentDocs(docId: string, notebookId: string, path: s
         }
     )
 
-    // 请求失败时 data 为 null，取空数组；同级无文档或未找到当前文档时，下面四项自然均为 null
+    // 请求失败时 data 为 null，取空数组
     const files = data?.files ?? [];
 
-    // 查找相邻文档
+    // 查找相邻文档；当前文档不在同级列表中（如刚创建/刚重命名、列表尚未刷新）时不做推断：
+    // index 为 -1 时 index < files.length - 1 成立，「下一篇」会错误地指向同级第一篇
     const index = files.findIndex(item => item.id === docId);
+    if ( index < 0 ) {
+        return { prevId: null, prevName: null, nextId: null, nextName: null };
+    }
+
     const prevName = index > 0 ? files[index - 1].name.replace(/\.sy$/, '') : null;
     const prevId = index > 0 ? files[index - 1].id : null;
     const nextName = index < files.length - 1 ? files[index + 1].name.replace(/\.sy$/, '') : null;
