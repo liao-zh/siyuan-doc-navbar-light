@@ -10,7 +10,6 @@ import { ContentRenderer } from "@/worker/contentRenderer";
 import { TaskProcessor } from "@/worker/taskProcessor";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import { getAllShowingDocId, removeInjected } from "@/utils/DOMUtils";
-import * as logger from "@/utils/logger";
 
 
 /**
