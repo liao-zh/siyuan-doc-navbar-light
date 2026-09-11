@@ -49,7 +49,7 @@ export default class PluginDocBreadcrumbLight extends Plugin {
         logger.logInfo("卸载插件");
         // 卸载插件时删除插件数据
         this.removeData(`${C.SETTING_STORAGE}.json`).catch(e => {
-            logger.logWarn(`卸载时删除插件数据失败：${e.msg}`);
+            logger.logWarn(`卸载时删除插件数据失败：${e?.msg ?? e}`);
         });
     }
 

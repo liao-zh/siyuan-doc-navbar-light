@@ -297,9 +297,11 @@ export class ContentRenderer {
         // 对每个子文档构建菜单项目
         for (let i = 0; i < childDocs.length; i++) {
             const childDoc = childDocs[i];
+            // 菜单项的 label 是 HTML 字符串，文档名来自用户输入，需转义后再拼接
+            const childDocName = escapeHtml(childDoc.name);
             menu.addItem({
                 icon: "iconFile",
-                label: `<span title="${childDoc.name}" style="${itemStyle}">${childDoc.name}</span>`,
+                label: `<span title="${childDocName}" style="${itemStyle}">${childDocName}</span>`,
                 click: (_, event) => {
                     openDocHandler(childDoc.id, event, protyleElement);
                 }
@@ -375,6 +377,21 @@ export class ContentRenderer {
         })
         return itemVNode
     }
+}
+
+/**
+ * 转义 HTML 特殊字符
+ * @description 文档名会被拼进 Menu 的 label（HTML 字符串），名称中的引号会截断属性、
+ * & 与尖括号会破坏标签结构，因此拼接前先转义
+ * @param text - 原始文本
+ * @returns {string} - 转义后的文本
+ */
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
 
 /**
