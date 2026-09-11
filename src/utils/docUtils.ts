@@ -4,6 +4,18 @@ import * as logger from "@/utils/logger";
 import { request, getHPathByID, getNotebookConf } from "@/utils/api"
 
 /**
+ * 节点 ID 正则，与内核 ast.IsNodeIDPattern 同形（14 位时间戳 + "-" + 7 位 [0-9a-z]）
+ * protyle 的 notebookId / block.rootID 在文档数据返回前、以及浮窗/块面板/搜索预览等非文档 protyle 上
+ * 可能是空串，直接请求内核会被 util.InvalidIDPattern 判为非法并返回 "invalid ID argument"
+ */
+const NODE_ID_PATTERN = /^\d{14}-[0-9a-z]{7}$/;
+
+/** 校验是否为合法节点 ID（对外发出的 id 参数统一先过这里） */
+function isValidNodeId(id: unknown): id is string {
+    return typeof id === "string" && NODE_ID_PATTERN.test(id);
+}
+
+/**
  * protyle信息接口
  * @property {string} docId - 文档ID
  * @property {string} notebookId - 笔记本ID
@@ -24,20 +36,33 @@ export interface IProtyleInfo {
 /**
  * 从protyle中获取所需信息
  * @param protyle - protyle对象
- * @returns {IProtyleInfo} - protyle信息
+ * @returns {IProtyleInfo | null} - protyle信息；id/path 未就绪或请求失败时返回 null
  */
-export async function getProtyleInfo(protyle: IProtyle): Promise < IProtyleInfo > {
+export async function getProtyleInfo(protyle: IProtyle): Promise<IProtyleInfo | null> {
     // 基本信息
     const id = protyle.id;
     const docId = protyle.block.rootID;
     const notebookId = protyle.notebookId;
     const path = protyle.path;
 
-    // 异步调用API获取信息
+    // 唯一出口校验：id/path 未就绪（文档数据返回前）或非法（浮窗/块面板/搜索预览等非文档 protyle）时跳过。
+    // 既不向内核发会被判为 invalid ID argument 的请求，也避免后续 path.split / conf.name 报错；
+    // 面包屑与相邻文档的 id、path 均源于此处，故下游无需重复校验；等待下一次事件触发时再处理
+    if ( !isValidNodeId(docId) || !isValidNodeId(notebookId) || typeof path !== "string" ) {
+        logger.logDebug(`protyle 信息未就绪，跳过：docId=${JSON.stringify(docId)}, notebookId=${JSON.stringify(notebookId)}, path=${JSON.stringify(path)}`);
+        return null;
+    }
+
+    // 异步调用API获取信息（request 失败时返回 null）
     const [notebookConf, hpath] = await Promise.all([
         getNotebookConf(notebookId),
         getHPathByID(docId),
     ]);
+
+    // id 格式合法但已失效（文档被删除、笔记本未打开）时跳过，避免后续取属性报错
+    if ( notebookConf === null || hpath === null ) {
+        return null;
+    }
 
     // 笔记本
     const notebookName = notebookConf.conf.name;
@@ -93,12 +118,15 @@ export async function getAdjacentDocs(docId: string, notebookId: string, path: s
         }
     )
 
+    // 请求失败时 data 为 null，取空数组；同级无文档或未找到当前文档时，下面四项自然均为 null
+    const files = data?.files ?? [];
+
     // 查找相邻文档
-    const index = data.files.findIndex(item => item.id === docId);
-    const prevName = index > 0 ? data.files[index - 1].name.replace(/\.sy$/, '') : null;
-    const prevId = index > 0 ? data.files[index - 1].id : null;
-    const nextName = index < data.files.length - 1 ? data.files[index + 1].name.replace(/\.sy$/, '') : null;
-    const nextId = index < data.files.length - 1 ? data.files[index + 1].id : null;
+    const index = files.findIndex(item => item.id === docId);
+    const prevName = index > 0 ? files[index - 1].name.replace(/\.sy$/, '') : null;
+    const prevId = index > 0 ? files[index - 1].id : null;
+    const nextName = index < files.length - 1 ? files[index + 1].name.replace(/\.sy$/, '') : null;
+    const nextId = index < files.length - 1 ? files[index + 1].id : null;
 
     // 信息整合
     const result = { prevName, prevId, nextName, nextId };
@@ -186,6 +214,13 @@ export function openDocHandler(docId: string, event: MouseEvent, protyleElement?
     event.stopPropagation();
     event.preventDefault();
 
+    // 非法 id 直接忽略：思源打开文档前会调用 /api/block/getBlockInfo，
+    // id 非法时内核返回 invalid ID argument 并弹出右上角提示
+    if ( !isValidNodeId(docId) ) {
+        logger.logWarn(`忽略非法的文档 id：${JSON.stringify(docId)}`);
+        return;
+    }
+
     // log
     // logger.logDebug(`打开文档：docId=${docId}`);
 
@@ -232,8 +267,13 @@ export async function createDocHandler(notebookId: string, path: string, event: 
     } else {
         const pathItems = path.split("/");
         parentID = pathItems[pathItems.length - 1].replace(/\.sy$/, '');
-        hpath = await getHPathByID(parentID);
-        hpath = hpath + leaf;
+        // 取父级路径失败时取消新建，避免拼出 "null/新文档" 这样的错误路径
+        const parentHPath = await getHPathByID(parentID);
+        if ( parentHPath === null ) {
+            logger.logWarn(`获取父级文档路径失败，取消新建文档：notebookId=${notebookId}, parentID=${parentID}`);
+            return;
+        }
+        hpath = parentHPath + leaf;
     }
 
     // log

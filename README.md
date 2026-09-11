@@ -55,6 +55,8 @@ Major and recent update history:
 - 0.7.3-4: Fixed issues including the horizontal scrollbar of the adjacent document area under some themes and opening documents in the clicked pane in split view
 - 0.7.6: Adjacent document buttons changed to icon-only display, with hover tooltips showing the document name or "This is the first/last document"
 - 0.8.0: Added the "Hide Block Breadcrumb" setting, which can merge the lock edit/document menu/more buttons of SiYuan's block breadcrumb into the document navigation bar; floating window previews behave consistently with the main editor
+- 0.8.1: Multi-window/sync compatibility: avoid the plugin being force-reloaded by SiYuan when its stored data changes
+- 0.8.2: Fixed the occasional "invalid ID argument" error toast shown on startup or during use
 
 Known issues:
 - Platform: Mobile devices are not supported

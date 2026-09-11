@@ -61,6 +61,13 @@ export class ContentRenderer {
             return;
         }
 
+        // 获取protyle信息（id 未就绪/非法时返回 null）：
+        // 需在创建任何 DOM 之前判断，避免跳过渲染时残留空的导航条容器
+        const protyleInfo = await getProtyleInfo(protyle);
+        if ( protyleInfo === null ) {
+            return;
+        }
+
         // 选择/创建外包装容器，插在块面包屑之前
         // 容器带 data-plugin-tag 标记，但不再被 snabbdom 整体接管（仅 patch 其内的导航条主体子节点）
         let container = selectInjectedInProtyle(protyle);
@@ -80,9 +87,6 @@ export class ContentRenderer {
             container.insertBefore(main, container.firstChild);
             mainCreated = true;
         }
-
-        // 获取protyle信息
-        const protyleInfo = await getProtyleInfo(protyle);
         // logger.logDebug("插入元素：protyle信息", protyleInfo);
         // logger.logDebug("插入元素：vnode缓存", Array.from(this.vnodesCache.keys()));
 

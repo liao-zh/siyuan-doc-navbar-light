@@ -7,12 +7,20 @@
  */
 
 import { fetchPost, fetchSyncPost, type IWebSocketData } from "siyuan";
+import * as logger from "@/utils/logger";
 
 
 export async function request(url: string, data: any) {
-    let response: IWebSocketData = await fetchSyncPost(url, data);
-    let res = response.code === 0 ? response.data : null;
-    return res;
+    // process 传 false：内核返回 code<0 时不走 processMessage，
+    // 避免插件自身的请求失败被弹成右上角的错误提示；错误交由日志记录，返回值统一为 null
+    // 注：本地 siyuan 类型包（1.2.6）只声明了 (url, data) 两个参数，
+    //     process 是运行时参数（app/src/util/fetch.ts），因此这里做类型断言
+    let response: IWebSocketData = await (fetchSyncPost as any)(url, data, undefined, false);
+    if (response.code !== 0) {
+        logger.logWarn(`请求失败：${url}，code=${response.code}, msg=${response.msg}`);
+        return null;
+    }
+    return response.data;
 }
 
 
@@ -55,7 +63,7 @@ export async function removeNotebook(notebook: NotebookId) {
 }
 
 
-export async function getNotebookConf(notebook: NotebookId): Promise<IResGetNotebookConf> {
+export async function getNotebookConf(notebook: NotebookId): Promise<IResGetNotebookConf | null> {
     let data = { notebook: notebook };
     let url = '/api/notebook/getNotebookConf';
     return request(url, data);
@@ -123,7 +131,7 @@ export async function getHPathByPath(notebook: NotebookId, path: string): Promis
 }
 
 
-export async function getHPathByID(id: BlockId): Promise<string> {
+export async function getHPathByID(id: BlockId): Promise<string | null> {
     let data = {
         id: id
     };
