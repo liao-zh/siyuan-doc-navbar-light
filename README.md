@@ -24,7 +24,7 @@ By displaying it above the block breadcrumb, the navigation bar remains visible 
 
 **Create New Document**: Click the arrow between breadcrumb levels to create a new document at the same level as the listed documents, with support for Alt/Ctrl+click to open the new document.
 
-**Settings**: Settings are available in the menu to configure display options, including whether adjacent documents are displayed in a floating manner and whether to show the new document button. You can also choose to hide the path bar of SiYuan's block breadcrumb.
+**Settings**: Settings are available in the menu to configure display options, including whether adjacent documents are displayed in a floating manner and whether to show the new document button. You can also choose to hide the path bar of SiYuan's native breadcrumb.
 
 ## Theme Adaptation
 
@@ -57,6 +57,7 @@ Major and recent update history:
 - 0.8.0: Added the "Hide Block Breadcrumb" setting, which can merge the lock edit/document menu/more buttons of SiYuan's block breadcrumb into the document navigation bar; floating window previews behave consistently with the main editor
 - 0.8.1: Multi-window/sync compatibility: avoid the plugin being force-reloaded by SiYuan when its stored data changes
 - 0.8.2: Fixed the occasional "invalid ID argument" error toast shown on startup or during use
+- 0.9.0: Adapted to SiYuan v3.8.10. Path names and icons now come from the same source as the native breadcrumb (custom icons, untitled docs); the child-document menu matches native icons and selection; fixed the widened gap between the path and adjacent buttons
 
 Known issues:
 - Platform: Mobile devices are not supported
@@ -78,6 +79,7 @@ Methods:
 - Monitored events: Document loading (loaded-protyle-static), document switching (switch-protyle), document modification (ws-main: moveDoc, rename, removeDoc, create)
 - Navigation bar rendering: Used snabbdom virtual DOM, only rendering when DOM changes occur, which improves performance and reduces interface flickering during updates
 - Adjacent document/subdocument lookup: Used SiYuan's API [/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath), which maintains the order in the document tree by default
+- Breadcrumb path: Uses SiYuan's API [/api/filetree/getDocPaths](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html) to fetch ancestor and current document titles plus custom icons, the same source as the native breadcrumb; falls back to getHPathByID below v3.8.10 or on failure
 - New document creation: Used SiYuan API [/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd) to create documents, passing in readable paths, and simultaneously passing the parentID parameter to ensure unique actual paths when duplicate readable paths exist
 
 Code structure: (Unlisted parts are the same as the plugin sample)
@@ -95,6 +97,7 @@ src/
 │   ├── pluginInstance.ts: Plugin instance management tool
 │   ├── DOMUtils.ts: DOM processing tools
 │   ├── docUtils.ts: Document processing tools
+│   ├── icon.ts: Converts stored icon values to emoji (same rule as the native breadcrumb)
 │   ├── logger.ts: Logging tool
 ```
 

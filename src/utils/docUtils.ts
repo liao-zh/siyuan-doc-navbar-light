@@ -2,6 +2,7 @@ import { type IProtyle, openTab } from "siyuan";
 import { getPluginInstance } from "@/utils/pluginInstance";
 import * as logger from "@/utils/logger";
 import { request, getHPathByID, getNotebookConf } from "@/utils/api"
+import { renderEmoji } from "@/utils/icon"
 
 /**
  * 节点 ID 正则，与内核 ast.IsNodeIDPattern 同形（14 位时间戳 + "-" + 7 位 [0-9a-z]）
@@ -16,25 +17,41 @@ function isValidNodeId(id: unknown): id is string {
 }
 
 /**
+ * 路径层级（上级文档）
+ * @property {string} id - 文档ID
+ * @property {string} name - 文档名称（与原生面包屑同源：标题文本，空标题为「未命名」）
+ */
+export interface IProtyleLevel {
+    id: string;
+    name: string;
+}
+
+/**
  * protyle信息接口
  * @property {string} docId - 文档ID
  * @property {string} notebookId - 笔记本ID
  * @property {string} notebookName - 笔记本名称
+ * @property {string} notebookIcon - 笔记本自定义图标（emoji 文本），空串表示用内置图标
  * @property {string} path - 文档路径
- * @property {string} hpath - 文档可读路径
+ * @property {IProtyleLevel[]} levels - 上级文档（不含笔记本与当前文档）
+ * @property {string} docName - 当前文档名称
+ * @property {Record<string, string>} icons - 文档ID -> 自定义 icon 原始值
  */
 export interface IProtyleInfo {
     id: string;
     docId: string;
     notebookId: string;
     notebookName: string;
+    notebookIcon: string;
     path: string;
-    hpath: string;
+    levels: IProtyleLevel[];
+    docName: string;
+    icons: Record<string, string>;
     rect: DOMRect;
 }
 
 /**
- * 从protyle中获取所需信息
+ * 从 protyle 中获取所需信息
  * @param protyle - protyle对象
  * @returns {IProtyleInfo | null} - protyle信息；id/path 未就绪或请求失败时返回 null
  */
@@ -53,34 +70,88 @@ export async function getProtyleInfo(protyle: IProtyle): Promise<IProtyleInfo | 
         return null;
     }
 
-    // 异步调用API获取信息（request 失败时返回 null）
-    const [notebookConf, hpath] = await Promise.all([
-        getNotebookConf(notebookId),
-        getHPathByID(docId),
-    ]);
-
-    // id 格式合法但已失效（文档被删除、笔记本未打开）时跳过，避免后续取属性报错
-    if ( notebookConf === null || hpath === null ) {
+    const pathInfo = await getDocumentPathInfo(notebookId, docId, path, window.siyuan.languages.untitled);
+    if ( pathInfo === null ) {
         return null;
     }
 
-    // 笔记本
-    const notebookName = notebookConf.conf.name;
+    // 笔记本名称/图标优先取内存里的 notebooks，取不到再请求内核
+    const notebooks = window.siyuan.notebooks as { id: string; name: string; icon?: string }[] | undefined;
+    const notebook = notebooks?.find(item => item.id === notebookId);
+    let notebookName = notebook?.name ?? "";
+    if ( !notebookName ) {
+        const notebookConf = await getNotebookConf(notebookId);
+        if ( notebookConf === null ) {
+            return null;
+        }
+        notebookName = notebookConf.conf.name;
+    }
 
-    // 窗口
-    const rect = protyle.element.getBoundingClientRect();
-
-    // 信息整合
-    const result: IProtyleInfo = {
+    return {
         id,
         docId,
         notebookId,
         notebookName,
+        notebookIcon: renderEmoji(notebook?.icon ?? ""),
         path,
-        hpath,
-        rect,
+        ...pathInfo,
+        rect: protyle.element.getBoundingClientRect(),
+    };
+}
+
+/**
+ * 3.8.10 起才有 /api/filetree/getDocPaths（全局面包屑同源数据）
+ * @returns {boolean} - 当前内核是否支持
+ */
+function supportsDocumentPaths(): boolean {
+    const parts = (window.siyuan.config.system?.kernelVersion ?? "").split(".").map(item => parseInt(item, 10) || 0);
+    const [major, minor, patch] = parts;
+    if ( major !== 3 ) {
+        return major > 3;
     }
-    return result
+    if ( minor !== 8 ) {
+        return minor > 8;
+    }
+    return patch >= 10;
+}
+
+/**
+ * 文档路径信息：优先用 3.8.10 新增的 getDocPaths（与原生面包屑同源：标题文本 + 自定义图标），
+ * 失败（旧版本 / 接口异常）时退回 protyle.path + getHPathByID 的旧算法
+ * @param untitled - 「未命名」文案
+ */
+async function getDocumentPathInfo(notebookId: string, docId: string, path: string, untitled: string):
+    Promise<{ levels: IProtyleLevel[]; docName: string; icons: Record<string, string> } | null> {
+    const pathItems = path.replace(/\.sy$/, "").split("/").slice(1);
+
+    // 3.8.10 起才有该接口；旧版直接跳过请求，避免每次渲染都发一次失败请求
+    const data = supportsDocumentPaths() ? await request("/api/filetree/getDocPaths", {notebook: notebookId, ids: [docId], includeIcons: true}) : null;
+    const document = data?.documents?.find((item: any) => item.id === docId && item.notebook === notebookId);
+    if ( document ) {
+        const levels: IProtyleLevel[] = (document.segments ?? [])
+            .filter((segment: any) => segment.id !== docId && segment.id !== notebookId)
+            .map((segment: any) => ({id: segment.id, name: segment.empty ? untitled : segment.text}));
+        // 段数与存储路径层级不符（异常数据）时走回退，保证箭头菜单的 path 与显示层级一一对应
+        if ( levels.length === pathItems.length - 1 ) {
+            return {
+                levels,
+                docName: document.title.empty ? untitled : document.title.text,
+                icons: data.icons ?? {},
+            };
+        }
+    }
+
+    // 回退：旧版本没有 getDocPaths，或接口/数据异常
+    const hpath = await getHPathByID(docId);
+    if ( hpath === null ) {
+        return null;
+    }
+    const hpathItems = hpath.split("/").slice(1);
+    return {
+        levels: pathItems.slice(0, -1).map((pid, i) => ({id: pid, name: hpathItems[i] ?? pid})),
+        docName: hpathItems[hpathItems.length - 1] ?? pathItems[pathItems.length - 1],
+        icons: {},
+    };
 }
 
 /** 相邻文档接口
@@ -139,13 +210,17 @@ export async function getAdjacentDocs(docId: string, notebookId: string, path: s
 }
 
 /**
- * 子文档接口
- * @property {string} name - 子文档名称
+ * 子文档接口（字段与原生面包屑子文档菜单同源）
+ * @property {string} name - 子文档名称（标题，空标题为「未命名」）
  * @property {string} id - 子文档ID
+ * @property {string} icon - 自定义图标（emoji 文本），空串表示用内置图标
+ * @property {number} subFileCount - 子文档数，>0 时用文件夹图标（与原生一致）
  */
 export interface IChildDoc {
     name: string;
     id: string;
+    icon: string;
+    subFileCount: number;
 }
 
 /**
@@ -170,10 +245,13 @@ export async function getChildDocs(notebookId: string, path: string): Promise<IC
         return [];
     }
 
-    // 提取子文档的名字和ID
-    const childDocs: IChildDoc[] = data.files.map(item => ({
-        name: item.name.replace(/\.sy$/, ''),
+    // 提取子文档的信息：名称用标题（空标题为「未命名」），图标/子文档数与原生菜单一致
+    const untitled = window.siyuan.languages.untitled;
+    const childDocs: IChildDoc[] = (data.files ?? []).map((item: any) => ({
+        name: item.titleEmpty ? untitled : item.name,
         id: item.id,
+        icon: renderEmoji(item.icon ?? ""),
+        subFileCount: item.subFileCount ?? 0,
     }));
     return childDocs
 }

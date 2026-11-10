@@ -34,9 +34,15 @@
     display: none;
 }
 
-/* 相邻文档区域：内容定宽、不收缩、不内滚 */
+/* 路径项：空间不足时收缩、文本省略；当前文档项由内联 flex 固定为不收缩 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__main .protyle-breadcrumb__item {
+    overflow: hidden;
+}
+
+/* 相邻文档条：内容定宽、不拉伸、不内滚（3.8.10 起原生 `.protyle-breadcrumb > .protyle-breadcrumb__bar`
+   带 flex:1，不显式声明会被拉宽，与路径条之间出现大片空白）*/
 [data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__adjacent-bar {
-    flex-shrink: 0;
+    flex: 0 0 auto;
     overflow: hidden;
 }
 
@@ -69,25 +75,12 @@
     background-color: var(--b3-list-hover);
 }
 
-/* 面包屑箭头：插件自持样式类，hover 时显示与文档名一致的凹陷强调背景 */
-[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__arrow {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    line-height: 24px;
-    height: 24px;
-    border-radius: var(--b3-border-radius);
-    margin: 3px 0;
-    border: 0;
-    background-color: transparent;
-    box-sizing: border-box;
+/* 层级间箭头用原生类名（protyle-breadcrumb__arrow--interactive）渲染，
+   尺寸/颜色/hover 交给思源与主题，这里只约束不参与 flex 收缩，避免被压成细条 */
+[data-plugin-tag="siyuan-doc-navbar-light-container"] .protyle-breadcrumb__arrow--interactive {
+    flex: 0 0 auto;
 }
 
-[data-plugin-tag="siyuan-doc-navbar-light-container"] .siyuan-doc-navbar-light__arrow:hover {
-    background-color: var(--b3-list-hover);
-}
 
 /* 当前文档项：始终完整显示，防止主题按位置压暗（如 Savor 的 :not(:last-child) 规则）
    特异性 (0,4,0) + !important，胜过任何主题的面包屑 opacity 普通声明 */

@@ -25,7 +25,7 @@
 
 新建文档：单击面包屑层级间的箭头，在与列出文档相同的层级新建文档，支持Alt/Ctrl+单击打开新文档。
 
-设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否显示新建文档按钮。也可选择隐藏思源块面包屑的路径条。
+设置：可在菜单中设置显示方式，包括相邻文档是否浮动显示，是否显示新建文档按钮。也可选择隐藏思源原生面包屑的路径条。
 
 ## 主题适配
 
@@ -58,6 +58,7 @@
 - 0.8.0：新增「隐藏块面包屑」设置，可将思源块面包屑的锁编辑/文档菜单/更多按钮并入文档导航条；浮窗预览与主编辑器保持一致
 - 0.8.1：兼容多窗口/同步场景，避免插件存储数据变化时被思源强制整插件重载
 - 0.8.2：修复启动/使用时右上角偶发「invalid ID argument」报错
+- 0.9.0：适配思源v3.8.10；路径名称与图标改用与原生面包屑同源的数据（自定义图标、「未命名」），子文档菜单图标与选中态对齐原生，修复路径与相邻文档之间间距变宽
 
 存在的问题：
 - 平台：不支持移动端
@@ -81,6 +82,7 @@
 - 监听的事件：文档加载（loaded-protyle-static），文档切换（switch-protyle），文档修改（ws-main：moveDoc，rename，removeDoc，create）
 - 渲染导航条：用了snabbdom虚拟DOM，只在DOM变化时渲染，提高了性能，减少更新时界面的闪烁
 - 相邻文档/子文档的查找：用了思源的API[/api/filetree/listDocsByPath](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#listDocsByPath)，默认保持文档树中的顺序
+- 路径层级：用思源API[/api/filetree/getDocPaths](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html)获取上级文档与当前文档的标题、自定义图标，与原生面包屑同源；低于v3.8.10或请求失败时回退到getHPathByID
 - 新建文档：用思源API[/api/filetree/createDocWithMd](https://docs.siyuan-note.club/zh-Hans/reference/community/siyuan-sdk/kernel/api/filetree.html#createDocWithMd)创建文档，传入可读路径，同时传入parentID参数以确保存在同名可读路径时，实际的路径唯一
 
 代码结构：（未列出的部分与插件示例相同）
@@ -98,6 +100,7 @@ src/
 │   ├── pluginInstance.ts：插件实例的管理工具
 │   ├── DOMUtils.ts：处理DOM的工具
 │   ├── docUtils.ts：处理文档的工具
+│   ├── icon.ts：图标值转emoji（与原生面包屑同规则）
 │   ├── logger.ts：日志工具
 ```
 

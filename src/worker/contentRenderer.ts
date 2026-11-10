@@ -133,10 +133,11 @@ export class ContentRenderer {
      * @returns {VNode} - 导航条vnode
      */
     async renderProtyle(protyleInfo: IProtyleInfo): Promise<VNode> {
-        // 构建导航条的元素：面包屑，空格，相邻文档
-        const breadcrumbVNode = this.createBreadcrumb(protyleInfo);
-        // 相邻文档按钮浮动显示时，空格元素不撑开，仅提供固定间距
+        // 相邻文档按钮是否浮动显示：开启时路径条只占内容宽度、相邻按钮紧随其后；
+        // 关闭时路径条吃满剩余宽度、相邻按钮固定在右侧（3.8.10 起原生样式会把两条都设为 flex:1，需显式声明）
         const float = this.plugin.settingManager.get(C.SETTING_KEY_ADJACENTDOC);
+        // 构建导航条的元素：面包屑，空格，相邻文档
+        const breadcrumbVNode = this.createBreadcrumb(protyleInfo, float);
         const spaceVNode = this.createSpace(float);
         const adjVNode = await this.createAdjacent(protyleInfo);
 
@@ -166,37 +167,40 @@ export class ContentRenderer {
      * @param protyleInfo - protyle信息
      * @returns {VNode} - 面包屑vnode
      */
-    createBreadcrumb(protyleInfo: IProtyleInfo): VNode {
+    createBreadcrumb(protyleInfo: IProtyleInfo, float: boolean): VNode {
         // 构建子元素数组
-        // 路径分段
+        // 层级来自存储路径（id 链），名称/图标来自 getDocPaths（与原生面包屑同源）
         const pathItems = protyleInfo.path.replace(/\.sy$/, '').split("/").slice(1);
-        const hpathItems = protyleInfo.hpath.split("/").slice(1);
+        const levels = protyleInfo.levels;
         const children: VNode[] = [];
         // 计算菜单最大宽度
         const menuRightMax = protyleInfo.rect.right;
         // 添加笔记本
-        let pathI = "/";
         children.push(
-            this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, "notebook"),
-            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
+            this.createBreadcrumbItem(protyleInfo.notebookId, protyleInfo.notebookName, protyleInfo.notebookIcon, "notebook"),
+            this.createBreadcrumbArrow(protyleInfo, "/", menuRightMax)
         );
         // 添加中间层级的文档
         for (let i = 0; i < pathItems.length - 1; i++) {
-            pathI = "/" + pathItems.slice(0, i+1).join("/") + ".sy";
+            const pathI = "/" + pathItems.slice(0, i+1).join("/") + ".sy";
+            const level = levels[i];
             children.push(
-                this.createBreadcrumbItem(pathItems[i], hpathItems[i], "doc-middle"),
-                this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
+                this.createBreadcrumbItem(pathItems[i], level?.name ?? pathItems[i], protyleInfo.icons[pathItems[i]] ?? "", "doc-middle"),
+                this.createBreadcrumbArrow(protyleInfo, pathI, menuRightMax)
             );
         }
         // 添加最后一层文档
-        pathI = "/" + pathItems.join("/") + ".sy";
         children.push(
-            this.createBreadcrumbItem(pathItems[pathItems.length - 1], hpathItems[hpathItems.length - 1], "doc-last"),
-            this.createBreadcrumbArrow(protyleInfo.notebookId, pathI, menuRightMax)
+            this.createBreadcrumbItem(protyleInfo.docId, protyleInfo.docName, protyleInfo.icons[protyleInfo.docId] ?? "", "doc-last"),
+            this.createBreadcrumbArrow(protyleInfo, protyleInfo.path, menuRightMax)
         );
 
         // 构建容器
-        const breadcrumbVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", children);
+        // 3.8.10 起原生样式为 `.protyle-breadcrumb > .protyle-breadcrumb__bar` 增加 flex:1，
+        // 路径条与相邻文档条会平分剩余宽度，两者之间被拉出大片空白；
+        // 这里用内联 flex 固定两种模式下的宽度分配，避免再被原生默认值带偏
+        const barAttrs = {style: {flex: float ? "0 1 auto" : "1 1 auto"}};
+        const breadcrumbVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap", barAttrs, children);
 
         return breadcrumbVNode;
     }
@@ -209,14 +213,19 @@ export class ContentRenderer {
      * @param type：面包屑项类型（notebook笔记本，doc-middle中间层级文档，doc-last最后一层文档）
      * @returns {VNode} - 面包屑项vnode
      */
-    createBreadcrumbItem(id: string, name: string, type: "notebook" | "doc-middle" | "doc-last"): VNode {
+    createBreadcrumbItem(id: string, name: string, icon: string, type: "notebook" | "doc-middle" | "doc-last"): VNode {
+        const isNotebook = type === "notebook";
         const itemVNode = createItem({
             id,
             name,
             innerHTML: name,
-            iconName: type === "notebook" ? "#iconFolder" : "#iconFile", // 笔记本用文件夹图标，文档用文件图标
-            isClickable: type !== "notebook", // 除了笔记本，都可以点击
+            iconName: isNotebook ? "#iconNotebook" : "#iconFile", // 与原生一致：笔记本用 iconNotebook，文档用 iconFile
+            customIcon: icon || undefined, // 文档设置的自定义 emoji 图标，优先于内置图标
+            showPopover: !isNotebook, // 笔记本图标不挂块浮窗
+            isClickable: !isNotebook, // 除了笔记本，都可以点击
             maxWidth: type === "doc-middle" ? C.STYLE_BREADCRUMBITEM_MAXWIDTH : "none", // 对中间文档限制宽度
+            // 当前文档项优先完整显示（不收缩）；笔记本与中间层级可收缩，空间不足时名字省略
+            shrink: type !== "doc-last",
             itemClass: type === "doc-last" ? "protyle-breadcrumb__item siyuan-doc-navbar-light__item--current" : undefined, // 当前文档项加标记类，配合样式防止主题按位置压暗
         })
         return itemVNode;
@@ -224,35 +233,37 @@ export class ContentRenderer {
 
     /**
      * 构建面包屑层级之间的箭头
-     * @param notebookId - 笔记本id
+     * @param protyleInfo - protyle信息（用于菜单选中态）
      * @param path - 文档路径
      * @returns {VNode} - 面包屑箭头vnode
      */
-    createBreadcrumbArrow(notebookId: string, path: string, menuRightMax: number): VNode {
-        // 设置箭头属性
+    createBreadcrumbArrow(protyleInfo: IProtyleInfo, path: string, menuRightMax: number): VNode {
+        // 直接用原生箭头类名渲染：尺寸、颜色、hover 与主题适配全部交给思源
+        // （自绘 padding/颜色会偏浅偏大，主题按 --interactive 适配时也吃不到）
         const arrowAttrs = {
-            style: {
-                cursor: "pointer",
+            attrs: {
+                type: "button",
+                "aria-label": window.siyuan.languages.expand,
+                tabindex: "-1",
             },
             on: {
-                click: this.listChildDocsHandler.bind(this, notebookId, path, menuRightMax),
-            }
+                click: this.listChildDocsHandler.bind(this, protyleInfo, path, menuRightMax),
+            },
         };
-        // 构建图标
-        const svgVNode = createSvg("protyle-breadcrumb__arrow", "#iconRight");
-        // 构建箭头
-        const arrowVNode = h("span.siyuan-doc-navbar-light__arrow", arrowAttrs, [ svgVNode ]);
-        return arrowVNode;
+        // svg 不挂类名，尺寸由原生 `.protyle-breadcrumb__arrow--interactive svg` 规则决定
+        const svgVNode = h("svg", [h("use", {attrs: {"xlink:href": "#iconRight"}})]);
+        return h("button.protyle-breadcrumb__arrow.protyle-breadcrumb__arrow--interactive.ariaLabel", arrowAttrs, [svgVNode]);
     }
 
     /**
      * 点击事件：打开子文档菜单
-     * @param notebookId - 笔记本id
+     * @param protyleInfo - protyle信息（提供笔记本、当前路径用于菜单选中态）
      * @param path - 文档路径
      * @param menuRightMax - 菜单右侧最大位置
      * @param event - 鼠标事件
      */
-    async listChildDocsHandler(notebookId: string, path: string, menuRightMax: number, event: MouseEvent) {
+    async listChildDocsHandler(protyleInfo: IProtyleInfo, path: string, menuRightMax: number, event: MouseEvent) {
+        const notebookId = protyleInfo.notebookId;
         // 阻止事件其他行为
         event.stopPropagation();
         event.preventDefault();
@@ -294,14 +305,22 @@ export class ContentRenderer {
             })
         }
 
+        // 当前路径上的文档在菜单里标记为 current（与原生一致）
+        const currentIds = new Set<string>([protyleInfo.notebookId, protyleInfo.docId, ...protyleInfo.levels.map(level => level.id)]);
+
         // 对每个子文档构建菜单项目
         for (let i = 0; i < childDocs.length; i++) {
             const childDoc = childDocs[i];
             // 菜单项的 label 是 HTML 字符串，文档名来自用户输入，需转义后再拼接
             const childDocName = escapeHtml(childDoc.name);
+            // 图标与原生菜单一致：自定义 emoji 优先，否则有子文档用文件夹、无子文档用文件
+            const iconHTML = childDoc.icon
+                ? `<span class="b3-menu__icon protyle-breadcrumb__graphic">${childDoc.icon}</span>`
+                : undefined;
             menu.addItem({
-                icon: "iconFile",
+                ...(iconHTML ? {iconHTML} : {icon: childDoc.subFileCount > 0 ? "iconFolder" : "iconFile"}),
                 label: `<span title="${childDocName}" style="${itemStyle}">${childDocName}</span>`,
+                current: currentIds.has(childDoc.id),
                 click: (_, event) => {
                     openDocHandler(childDoc.id, event, protyleElement);
                 }
@@ -344,8 +363,10 @@ export class ContentRenderer {
 
         // 构建相邻元素：[上一篇，下一篇]
         // 相邻文档区域使用插件自持样式类，避免主题按位置改 .protyle-breadcrumb__item 的样式（如 Savor 的 :first-child）
+        // 相邻文档条不参与剩余宽度分配：浮动态紧随路径条，固定态贴右
+        const adjAttrs = {style: {flex: "0 0 auto"}};
         const adjVNode = h("div.protyle-breadcrumb__bar.protyle-breadcrumb__bar--nowrap.siyuan-doc-navbar-light__adjacent-bar",
-            [prevVNode, nextVNode]
+            adjAttrs, [prevVNode, nextVNode]
         )
         return adjVNode;
     }
@@ -421,6 +442,10 @@ function createItem({
         itemClass,
         ariaLabel,
         showText = true,
+        shrink = false,
+        minWidth = C.STYLE_BREADCRUMBITEM_MINWIDTH,
+        customIcon,
+        showPopover = true,
     }: {
         id: string;
         name: string;
@@ -432,6 +457,10 @@ function createItem({
         itemClass?: string;
         ariaLabel?: string;
         showText?: boolean;
+        shrink?: boolean;
+        minWidth?: string;
+        customIcon?: string;
+        showPopover?: boolean;
     }): VNode {
 
     // 设置item属性
@@ -441,6 +470,8 @@ function createItem({
             ...(ariaLabel && { title: ariaLabel }),
         },
         style: {
+            // 可收缩项用内容宽做基准 + min-width 下限；当前文档/相邻文档项固定内容宽
+            ...(shrink ? { flex: "0 1 auto", "min-width": minWidth } : { flex: "0 0 auto" }),
             ...(maxWidth && { "max-width": maxWidth }),
             ...(!isClickable && naOpacity && { "opacity": naOpacity }),
             cursor: isClickable ? "pointer" : "default",
@@ -454,8 +485,13 @@ function createItem({
         },
     };
 
-    // 构建图标
-    const svgVNode = createSvg("popover__block", iconName, isClickable? id:undefined);
+    // 构建图标：文档自定义 emoji 图标优先（与原生面包屑一致），否则用内置 svg
+    const svgVNode = customIcon
+        ? h(showPopover ? "span.popover__block.protyle-breadcrumb__graphic" : "span.protyle-breadcrumb__graphic",
+            {
+                ...(showPopover && id && {dataset: {id}}),
+            }, customIcon)
+        : createSvg("popover__block", iconName, isClickable? id:undefined);
 
     // 构建文本
     const textAttrs = {

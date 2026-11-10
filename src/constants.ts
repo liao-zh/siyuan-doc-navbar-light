@@ -15,4 +15,6 @@ export class CONSTANTS {
     // HTML元素样式
     public static readonly STYLE_DISABLED_OPACITY: string = "0.5";
     public static readonly STYLE_BREADCRUMBITEM_MAXWIDTH: string = "160px";
+    // 笔记本与中间层级的收缩下限：空间不足时收到该宽度、名字省略；当前文档项不收缩
+    public static readonly STYLE_BREADCRUMBITEM_MINWIDTH: string = "48px";
 }
